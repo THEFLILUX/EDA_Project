@@ -2,14 +2,11 @@
 
 #include <iostream>
 
-#include "PNMImage.hpp"
-#include "PRQuadTreeImage.hpp"
-
 // Referencia: file = "../tests/images/test8/img8";
 
-using namespace utec::spatial;
+// using namespace utec::spatial;
 
-TEST(QuadTest8, BasicTest) { EXPECT_TRUE(1); }
+TEST(FirstTest, BasicTest) { EXPECT_TRUE(1); }
 
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
