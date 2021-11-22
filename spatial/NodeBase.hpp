@@ -13,9 +13,11 @@ namespace spatial {
 
 class NodeBase {
  public:
-  virtual void setPath(std::string path) = 0;
   virtual std::string getPath() = 0;
+
+ private:
   virtual void load() = 0;
+  virtual void download() = 0;
 };
 
 template <typename T>
