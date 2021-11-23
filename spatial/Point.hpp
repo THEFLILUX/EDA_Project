@@ -1,5 +1,7 @@
 #pragma once
 
+#include <math.h>
+
 #include <iostream>
 
 namespace utec {
@@ -25,6 +27,10 @@ class Point {
   }
   friend bool operator!=(const Point& a, const Point& b) {
     return a.lon != b.lon || a.lat != b.lat;
+  }
+  friend double operator-(const Point& a, const Point& b) {
+    return sqrt((a.lon - b.lon) * (a.lon - b.lon) +
+                (a.lat - b.lat) * (a.lat - b.lat));
   }
 
  private:

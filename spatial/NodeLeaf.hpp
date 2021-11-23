@@ -7,7 +7,6 @@ namespace spatial {
 
 class NodeLeaf : public NodeBase {
  public:
-  NodeLeaf() {}
   NodeLeaf(std::string path, uint M = 0) : path(path) {
     f.open(this->path, std::ios::binary | std::ios::in | std::ios::out);
     if (!f) {
@@ -24,29 +23,12 @@ class NodeLeaf : public NodeBase {
       this->load();
     }
     f.close();
-
-    /*f.open(this->path, std::ios::binary | std::ios::in | std::ios::out);
-    if (f.is_open()) {
-      if (is_empty(f)) {
-        // New nodeLeaf
-        this->M = M;
-        this->m = M / 2;
-        this->mbr = MBR(Point(-1, -1), Point(-1, -1));
-        this->download();
-      } else {
-        // Load existing nodeLeaf
-        this->load();
-      }
-      f.close();
-    } else
-      std::cout << "Open file error in NodeLeaf constructor.\n";
-      */
   }
 
   std::string getPath() override { return this->path; }
-  uint getSize() { return this->trips.size(); }
+  uint getSize() override { return this->trips.size(); }
   MBR getMBR() { return this->mbr; }
-  void insertTrip(Trip trip) {
+  void insertTrip(Trip trip) override {
     this->trips.push_back(trip);
     if (trips.size() == 1) {
       this->mbr = MBR(trip.getPoint());
@@ -80,8 +62,8 @@ class NodeLeaf : public NodeBase {
       }
     }
   }
-
-  void writeToFile() {
+  void readToFile() override {}
+  void writeToFile() override {
     std::cout << "Writing to file\n";
     f.open(this->path, std::ios::binary | std::ios::out | std::ios::trunc);
     if (f.is_open()) {
@@ -94,7 +76,7 @@ class NodeLeaf : public NodeBase {
       std::cout << "Open file error in NodeLeaf writeToFIle\n";
   }
 
-  void printNode() {
+  void printNode() override {
     std::cout << "\n";
     std::cout << "M: " << M << "\n";
     std::cout << "m: " << m << "\n";
@@ -158,22 +140,22 @@ class NodeLeaf : public NodeBase {
   void download() override {
     write(f, this->M);
     write(f, this->m);
-    double parDouble = this->mbr.getIni().getLon();
+    double parDouble = this->mbr.getIniLon();
     write(f, parDouble);
-    parDouble = this->mbr.getIni().getLat();
+    parDouble = this->mbr.getIniLat();
     write(f, parDouble);
-    parDouble = this->mbr.getFin().getLon();
+    parDouble = this->mbr.getFinLon();
     write(f, parDouble);
-    parDouble = this->mbr.getFin().getLat();
+    parDouble = this->mbr.getFinLat();
     write(f, parDouble);
 
     uint parUint = this->trips.size();
     write(f, parUint);
 
     for (Trip trip : trips) {
-      parDouble = trip.getPoint().getLon();
+      parDouble = trip.getLon();
       write(f, parDouble);
-      parDouble = trip.getPoint().getLat();
+      parDouble = trip.getLat();
       write(f, parDouble);
 
       parUint = trip.getPath().size();

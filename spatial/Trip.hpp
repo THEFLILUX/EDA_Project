@@ -28,6 +28,9 @@ class Trip {
     this->path = path;
     this->line = line;
   }
+  friend double operator-(const Trip& a, const Trip& b) {
+    return a.point - b.point;
+  }
 
  private:
   Point point;

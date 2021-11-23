@@ -13,6 +13,14 @@ class NodeIntern : public NodeBase {
   }
   std::string getPath() override { return ""; }
 
+  void printNode() override {}
+  void insertTrip(Trip trip) override {}
+
+  void readToFile() override {}
+  void writeToFile() override {}
+
+  uint getSize() override { return 0; }
+
  private:
   uint M;
   uint m;

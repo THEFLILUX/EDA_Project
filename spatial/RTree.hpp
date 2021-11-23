@@ -12,7 +12,7 @@ namespace spatial {
 class RTree {
  public:
   RTree(std::string path, uint Mleaf = 0, uint Mintern = 0)
-      : rootPath(path), nodeLeaf(nullptr), nodeIntern(nullptr) {
+      : rootPath(path), root(nullptr) {
     std::cout << "Ṕath: " << this->rootPath + this->rootName << "\n";
     f.open(this->rootPath + this->rootName,
            std::ios::binary | std::ios::in | std::ios::out);
@@ -36,45 +36,14 @@ class RTree {
     }
     f.close();
     if (this->isRootANodeLeaf) {
-      this->nodeLeaf = new NodeLeaf(
+      this->root = new NodeLeaf(
           this->rootPath + "node" + std::to_string(this->nodeNumber) + ".rtree",
           this->Mleaf);
     } else {
-      this->nodeIntern = new NodeIntern(
+      this->root = new NodeIntern(
           this->rootPath + "node" + std::to_string(this->nodeNumber) + ".rtree",
           this->Mintern);
     }
-
-    /*
-    if (f.is_open()) {
-      if (is_empty(f)) {
-        // New Rtree
-        std::cout << "New RTree\n";
-        this->Mleaf = Mleaf;
-        this->mleaf = Mleaf / 2;
-        this->Mintern = Mintern;
-        this->mintern = Mintern / 2;
-        this->nodeNumber = 1;
-        this->isRootANodeLeaf = true;
-        this->download();
-      } else {
-        // Load existing RTree
-        std::cout << "Load RTree\n";
-        this->load();
-      }
-      if (this->isRootANodeLeaf) {
-        this->nodeLeaf =
-            new NodeLeaf(this->rootPath + "node" +
-                         std::to_string(this->nodeNumber) + ".rtree");
-      } else {
-        this->nodeIntern =
-            new NodeIntern(this->rootPath + "node" +
-                           std::to_string(this->nodeNumber) + ".rtree");
-      }
-      f.close();
-    } else
-      std::cout << "Open file error in RTree constructor.\n";
-      */
   }
   void writeToFile() {
     std::cout << "Writing rtree to file\n";
@@ -87,13 +56,13 @@ class RTree {
       std::cout << "Open file error in Rtree writeToFIle\n";
 
     // temporal
-    this->nodeLeaf->writeToFile();
+    this->root->writeToFile();
   }
 
   void insertTrip(Trip trip) {
     if (isRootANodeLeaf) {
-      nodeLeaf->insertTrip(trip);
-      if (nodeLeaf->getSize() == this->Mleaf) {
+      root->insertTrip(trip);
+      if (root->getSize() == this->Mleaf) {
         std::cout << "Split required\n";
       }
     } else {
@@ -112,16 +81,15 @@ class RTree {
     std::cout << "Rootpath: " << this->rootPath << "\n";
 
     if (isRootANodeLeaf) {
-      nodeLeaf->printNode();
+      root->printNode();
     } else {
       // printRTree
     }
   }
-  void rangeSearch(MBR mbr) {}
+  void rangeSearch(Point ini, Point fin) {}
 
  private:
-  NodeLeaf *nodeLeaf;
-  NodeIntern *nodeIntern;
+  NodeBase *root;
   std::string rootPath;  // file with root info
   std::string rootName = "root.rtree";
   bool isRootANodeLeaf;
