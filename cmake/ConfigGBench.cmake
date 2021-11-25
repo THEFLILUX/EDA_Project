@@ -1,4 +1,4 @@
-# Adapted from https://github.com/Crascit/DownloadProject/blob/master/CMakeLists.txt
+# Adapted from https://github.com/Crascit/DownloadProject/blob/main/CMakeLists.txt
 #
 # CAVEAT: use DownloadProject.cmake
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -12,7 +12,7 @@ endif()
 INCLUDE(cmake/DownloadProject.cmake)
 download_project(PROJ                googlebenchmark
                  GIT_REPOSITORY      https://github.com/google/benchmark.git
-                 GIT_TAG             master
+                 GIT_TAG             main
                  ${UPDATE_DISCONNECTED_IF_AVAILABLE}
 )
 

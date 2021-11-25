@@ -9,7 +9,7 @@
 using namespace utec::spatial;
 
 TEST(FirstTest, BasicTest) {
-  /*uint Mleaf = 4;
+  uint Mleaf = 4;
   uint Mintern = 4;
   std::string path = "../tests/RTree/";
 
@@ -29,14 +29,14 @@ TEST(FirstTest, BasicTest) {
   std::cout << "\n3er print\n";
   rtree.printTree();
   rtree.writeToFile();
-*/
 
+/*
   std::string path = "../tests/RTree/";
 
   RTree rtree(path);
   std::cout << "\n1er print\n";
   rtree.printTree();
-
+*/
   EXPECT_TRUE(1);
 }
 
