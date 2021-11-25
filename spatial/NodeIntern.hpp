@@ -52,7 +52,46 @@ class NodeIntern : public NodeBase {
   std::fstream f;
 
   void load() override {
-    // load nodeLeaf info
+    this->MBRs.clear();
+    this->children.clear();
+
+    read(f, this->M);
+    read(f, this->m);
+
+    size_t size;
+    read(f, size);
+    for (size_t i = 0; i < this->MBRs.size(); i++){
+      double pointLon, pointLat;
+      read(f, pointLon);
+      read(f, pointLat);
+      this->MBRs[i].setIni(Point(pointLon, pointLat));
+      read(f, pointLon);
+      read(f, pointLat);
+      this->MBRs[i].setFin(Point(pointLon, pointLat));
+    }
+
+    uint size;
+    read(f, size);
+    for (int i = 0; i < size; i++) {
+      // Read trips
+      /*read(f, pointLon);
+      read(f, pointLat);*/
+
+      uint sizeBuffer;
+      std::string tripPath;
+      read(f, sizeBuffer);
+      char* buffer = new char[sizeBuffer + 1];
+      f.read(buffer, sizeBuffer);
+      buffer[sizeBuffer] = '\0';
+      tripPath = buffer;
+      delete buffer;
+
+      /*uint line;
+      read(f, line);
+
+      Trip trip(pointLon, pointLat, tripPath, line);
+      this->trips.push_back(trip);*/
+    }
   }
 
   void download() override {
