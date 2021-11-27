@@ -3,8 +3,35 @@
 #include "NodeIntern.hpp"
 #include "NodeLeaf.hpp"
 
+/*
+IndexFile:
+0: long posIni, bool isNodeLeaf
+1:
+*/
 namespace utec {
 namespace spatial {
+
+class RootBucket {
+ public:
+  uint Mleaf;
+  uint mleaf;
+  uint Mintern;
+  uint mintern;
+  uint rootNumber;
+  bool isRootANodeLeaf;
+  uint nextNodeNumber;
+
+  RootBucket() {}
+  void print() {
+    std::cout << "Mleaf: " << Mleaf << "\n";
+    std::cout << "mleaf: " << mleaf << "\n";
+    std::cout << "Minter: " << Mintern << "\n";
+    std::cout << "mintern: " << mintern << "\n";
+    std::cout << "rootNumber: " << rootNumber << "\n";
+    std::cout << "isRootANodeLeaf: " << isRootANodeLeaf << "\n";
+    std::cout << "nextNodeNumber: " << nextNodeNumber << "\n";
+  }
+};
 
 /**
  * RTree implementation
@@ -13,56 +40,79 @@ class RTree {
  public:
   RTree(std::string path, uint Mleaf = 0, uint Mintern = 0)
       : rootPath(path), root(nullptr) {
-    std::cout << "Ṕath: " << this->rootPath + this->rootName << "\n";
-    f.open(this->rootPath + this->rootName,
-           std::ios::binary | std::ios::in | std::ios::out);
-    if (!f) {
-      std::cout << "Not exists, creating file in root constructor\n";
-      f.open(this->rootPath + this->rootName,
-             std::ios::binary | std::ios::in | std::ios::out);
+    std::cout << "Index Path: " << this->rootPath + this->indexName << "\n";
+    std::cout << "Data Path: " << this->rootPath + this->dataName << "\n";
+
+    findex.open(this->rootPath + this->indexName,
+                std::ios::binary | std::ios::app);
+    findex.close();
+    fdata.open(this->rootPath + this->dataName,
+               std::ios::binary | std::ios::app);
+    fdata.close();
+
+    findex.open(this->rootPath + this->indexName,
+                std::ios::binary | std::ios::in | std::ios::out);
+    fdata.open(this->rootPath + this->dataName,
+               std::ios::binary | std::ios::in | std::ios::out);
+    if (is_empty(findex)) {
+      std::cout
+          << "Not exists, creating index and data files in root constructor\n";
       // New Rtree
       std::cout << "New RTree\n";
-      this->Mleaf = Mleaf;
-      this->mleaf = Mleaf / 2;
-      this->Mintern = Mintern;
-      this->mintern = Mintern / 2;
-      this->nodeNumber = 1;
-      this->isRootANodeLeaf = true;
+      this->rootBucket.Mleaf = Mleaf;
+      this->rootBucket.mleaf = Mleaf / 2;
+      this->rootBucket.Mintern = Mintern;
+      this->rootBucket.mintern = Mintern / 2;
+      this->rootBucket.rootNumber = 1;
+      this->rootBucket.isRootANodeLeaf = true;
+      this->rootBucket.nextNodeNumber = 2;
+
       this->download();
+
+      this->close();
+      root = new NodeLeaf(this->rootPath + this->indexName,
+                          this->rootPath + this->dataName, 1, Mleaf, true);
+      this->open();
+
+      delete root;
+      root = nullptr;
     } else {
       // Load existing RTree
       std::cout << "Load RTree\n";
       this->load();
     }
-    f.close();
-    if (this->isRootANodeLeaf) {
+    if (this->rootBucket.isRootANodeLeaf) {
+      this->close();
       this->root = new NodeLeaf(
-          this->rootPath + "node" + std::to_string(this->nodeNumber) + ".rtree",
-          this->Mleaf);
+          this->rootPath + this->indexName, this->rootPath + this->dataName,
+          this->rootBucket.rootNumber, this->rootBucket.Mleaf);
+      this->open();
     } else {
+      this->close();
       this->root = new NodeIntern(
-          this->rootPath + "node" + std::to_string(this->nodeNumber) + ".rtree",
-          this->Mintern);
+          this->rootPath + this->indexName, this->rootPath + this->dataName,
+          this->rootBucket.rootNumber, this->rootBucket.Mintern);
+      this->open();
     }
+  }
+  ~RTree() {
+    findex.close();
+    fdata.close();
   }
   void writeToFile() {
     std::cout << "Writing rtree to file\n";
-    f.open(this->rootPath + this->rootName,
-           std::ios::binary | std::ios::out | std::ios::trunc);
-    if (f.is_open()) {
-      this->download();
-      f.close();
-    } else
-      std::cout << "Open file error in Rtree writeToFIle\n";
+    this->download();
 
     // temporal
+    this->close();
     this->root->writeToFile();
+    this->open();
   }
 
   void insertTrip(Trip trip) {
-    if (isRootANodeLeaf) {
+    if (this->rootBucket.isRootANodeLeaf) {
       root->insertTrip(trip);
-      if (root->getSize() == this->Mleaf) {
+      if (root->getSize() == this->rootBucket.Mleaf) {
         std::cout << "Split required\n";
       }
     } else {
@@ -72,15 +122,12 @@ class RTree {
 
   void printTree() {
     std::cout << "\n";
-    std::cout << "Mleaf: " << this->Mleaf << "\n";
-    std::cout << "mleaf: " << this->mleaf << "\n";
-    std::cout << "Mintern: " << this->Mintern << "\n";
-    std::cout << "Mintern: " << this->mintern << "\n";
-    std::cout << "NodeNumber: " << this->nodeNumber << "\n";
-    std::cout << "isRootANodeLeaf: " << this->isRootANodeLeaf << "\n";
-    std::cout << "Rootpath: " << this->rootPath << "\n";
+    std::cout << "rootPath: " << rootPath << "\n";
+    std::cout << "indexName: " << indexName << "\n";
+    std::cout << "dataName: " << dataName << "\n";
+    this->rootBucket.print();
 
-    if (isRootANodeLeaf) {
+    if (this->rootBucket.isRootANodeLeaf) {
       root->printNode();
     } else {
       // printRTree
@@ -91,32 +138,33 @@ class RTree {
  private:
   NodeBase *root;
   std::string rootPath;  // file with root info
-  std::string rootName = "root.rtree";
-  bool isRootANodeLeaf;
-  std::fstream f;
-  uint Mleaf;
-  uint mleaf;
-  uint Mintern;
-  uint mintern;
-  uint nodeNumber;
+  std::string indexName = "index.rtree";
+  std::string dataName = "data.rtree";
+  std::fstream fdata;
+  std::fstream findex;
+  RootBucket rootBucket;
+
+  void open() {
+    findex.open(this->rootPath + this->indexName,
+                std::ios::binary | std::ios::in | std::ios::out);
+    fdata.open(this->rootPath + this->dataName,
+               std::ios::binary | std::ios::in | std::ios::out);
+  }
+
+  void close() {
+    findex.close();
+    fdata.close();
+  }
 
   void load() {
-    // Format: bool, uint Mleaf, mleaf, Mint, mint, nodenumber
-    read(f, this->isRootANodeLeaf);
-    read(f, this->Mleaf);
-    read(f, this->mleaf);
-    read(f, this->Mintern);
-    read(f, this->mintern);
-    read(f, this->nodeNumber);
+    fdata.seekp(0, std::ios::beg);
+    read(fdata, this->rootBucket);
   }
   void download() {
-    // Format:bool
-    write(f, this->isRootANodeLeaf);
-    write(f, this->Mleaf);
-    write(f, this->mleaf);
-    write(f, this->Mintern);
-    write(f, this->mintern);
-    write(f, this->nodeNumber);
+    long posIni = 0;
+    fdata.seekp(0, std::ios::beg);
+
+    write(fdata, this->rootBucket);
   }
 };
 

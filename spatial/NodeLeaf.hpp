@@ -7,27 +7,27 @@ namespace spatial {
 
 class NodeLeaf : public NodeBase {
  public:
-  NodeLeaf(std::string path, uint M = 0) : path(path) {
-    f.open(this->path, std::ios::binary | std::ios::in | std::ios::out);
-    if (!f) {
-      std::cout << "Not exists, creating file in nodeLeaf constructor\n";
-      f.open(this->path, std::ios::binary | std::ios::in | std::ios::out);
+  NodeLeaf(std::string index, std::string data, uint nodeID, uint M = 0,
+           bool isNew = false)
+      : index(index), data(data), nodeID(nodeID) {
+    if (isNew) {
       // New nodeLeaf
-      this->M = M;
-      this->m = M / 2;
-      this->mbr = MBR(Point(-1, -1), Point(-1, -1));
-      this->download();
+      this->mbr = MBR(Point(-1, -1));
+
+      this->nodeLeafBucket.M = M;
+      this->nodeLeafBucket.m = M / 2;
+      this->nodeLeafBucket.vectorsSize = 0;
+      this->download(isNew);
     } else {
       // Load existing nodeLeaf
       std::cout << "Load nodeLeaf\n";
       this->load();
     }
-    f.close();
   }
 
-  std::string getPath() override { return this->path; }
   uint getSize() override { return this->trips.size(); }
   MBR getMBR() { return this->mbr; }
+
   void insertTrip(Trip trip) override {
     this->trips.push_back(trip);
     if (trips.size() == 1) {
@@ -63,108 +63,98 @@ class NodeLeaf : public NodeBase {
     }
   }
   void readToFile() override {}
+
   void writeToFile() override {
-    std::cout << "Writing to file\n";
-    f.open(this->path, std::ios::binary | std::ios::out | std::ios::trunc);
-    if (f.is_open()) {
-      // Format:M, m, mbr.ini.long, mbr.ini.lat, mbr.fin.long, mbr.fin.lat,
-      //#trips (uint), trip: point.long, point.lat, uint(size of str),
-      // char*, uint line
-      this->download();
-      f.close();
-    } else
-      std::cout << "Open file error in NodeLeaf writeToFIle\n";
+    std::cout << "Writing NodeLeaf to file\n";
+    this->download(false);
   }
 
   void printNode() override {
-    std::cout << "\n";
-    std::cout << "M: " << M << "\n";
-    std::cout << "m: " << m << "\n";
-    std::cout << "MBR: (" << mbr.getIniLon() << ", " << mbr.getIniLat() << ") ("
-              << mbr.getFinLon() << ", " << mbr.getFinLat() << ")\n";
-    std::cout << "path: " << path << "\n";
-    std::cout << "trips: " << trips.size() << "\n";
+    std::cout << "\nNode Leaf\n";
+    std::cout << "nodeID: " << this->nodeID << "\n";
+    std::cout << "MBR: (" << this->mbr.getIniLon() << ", "
+              << this->mbr.getIniLat() << ") (" << this->mbr.getFinLon() << ", "
+              << this->mbr.getFinLat() << ")\n";
+    std::cout << "\tPrint bucket:\n";
+    this->nodeLeafBucket.print();
     for (int i = 0; i < trips.size(); i++) {
       std::cout << "\tTrip " << i << ": (" << trips[i].getLon() << ", "
-                << trips[i].getLat() << ") line: " << trips[i].getLine()
-                << " path: " << trips[i].getPath() << "\n";
+                << trips[i].getLat() << ") tripInit: " << trips[i].getTripInit()
+                << " tripOffset: " << trips[i].getTripOffset();
+      trips[i].print();
     }
   }
 
  private:
-  uint M;
-  uint m;
-  MBR mbr;
-  std::string path;
+  uint nodeID;
+  NodeBucket nodeLeafBucket;
   std::vector<Trip> trips;
-  std::fstream f;
+  MBR mbr;
+  std::string index;
+  std::string data;
 
   void load() override {
-    // Format:M, m, mbr.ini.long, mbr.ini.lat, mbr.fin.long, mbr.fin.lat,
-    //#trips (uint), trip: point.long, point.lat, uint(size of str),
-    // char*, uint line
+    std::fstream findex;
+    std::fstream fdata;
+    findex.open(this->index, std::ios::binary | std::ios::in | std::ios::out);
+    fdata.open(this->data, std::ios::binary | std::ios::in | std::ios::out);
+
     this->trips.clear();
-    double pointLon, pointLat;
-    read(f, this->M);
-    read(f, this->m);
-    read(f, pointLon);
-    read(f, pointLat);
-    this->mbr.setIni(Point(pointLon, pointLat));
-    read(f, pointLon);
-    read(f, pointLat);
-    this->mbr.setFin(Point(pointLon, pointLat));
 
-    uint size;
-    read(f, size);
-    for (int i = 0; i < size; i++) {
-      // Read trips
-      read(f, pointLon);
-      read(f, pointLat);
+    IndexBucket indexBucket;
+    findex.seekg((this->nodeID - 1) * sizeof(IndexBucket), std::ios::beg);
+    read(findex, indexBucket);
 
-      uint sizeBuffer;
-      std::string tripPath;
-      read(f, sizeBuffer);
-      char* buffer = new char[sizeBuffer + 1];
-      f.read(buffer, sizeBuffer);
-      buffer[sizeBuffer] = '\0';
-      tripPath = buffer;
-      delete buffer;
-
-      uint line;
-      read(f, line);
-
-      Trip trip(pointLon, pointLat, tripPath, line);
+    fdata.seekg(indexBucket.posIni, std::ios::beg);
+    read(fdata, this->nodeLeafBucket);
+    Trip trip;
+    for (int i = 0; i < this->nodeLeafBucket.vectorsSize; i++) {
+      read(fdata, trip);
       this->trips.push_back(trip);
     }
+
+    findex.close();
+    fdata.close();
+
+    this->mbr = MBR(this->nodeLeafBucket.iniLon, this->nodeLeafBucket.iniLat,
+                    this->nodeLeafBucket.finLon, this->nodeLeafBucket.finLat);
   }
-  void download() override {
-    write(f, this->M);
-    write(f, this->m);
-    double parDouble = this->mbr.getIniLon();
-    write(f, parDouble);
-    parDouble = this->mbr.getIniLat();
-    write(f, parDouble);
-    parDouble = this->mbr.getFinLon();
-    write(f, parDouble);
-    parDouble = this->mbr.getFinLat();
-    write(f, parDouble);
+  void download(bool isNew) override {
+    std::fstream findex;
+    std::fstream fdata;
+    findex.open(this->index, std::ios::binary | std::ios::in | std::ios::out);
+    fdata.open(this->data, std::ios::binary | std::ios::in | std::ios::out);
 
-    uint parUint = this->trips.size();
-    write(f, parUint);
-
-    for (Trip trip : trips) {
-      parDouble = trip.getLon();
-      write(f, parDouble);
-      parDouble = trip.getLat();
-      write(f, parDouble);
-
-      parUint = trip.getPath().size();
-      write(f, parUint);
-      f.write(trip.getPath().c_str(), parUint);
-
-      parUint = trip.getLine();
-      write(f, parUint);
+    if (isNew) {
+      findex.seekp(0, std::ios::end);
+      fdata.seekp(0, std::ios::end);
+      long posIni = fdata.tellp();
+      IndexBucket indexBucket(posIni, true);
+      write(findex, indexBucket);
+    } else {
+      IndexBucket indexBucket;
+      findex.seekg((this->nodeID - 1) * sizeof(IndexBucket), std::ios::beg);
+      read(findex, indexBucket);
+      fdata.seekp(indexBucket.posIni, std::ios::beg);
     }
+    this->nodeLeafBucket.vectorsSize = this->trips.size();
+    this->nodeLeafBucket.iniLon = this->mbr.getIniLon();
+    this->nodeLeafBucket.iniLat = this->mbr.getIniLat();
+    this->nodeLeafBucket.finLon = this->mbr.getFinLon();
+    this->nodeLeafBucket.finLat = this->mbr.getFinLat();
+
+    write(fdata, this->nodeLeafBucket);
+
+    Trip dump;
+    for (int i = 0; i < this->nodeLeafBucket.M; i++) {
+      if (i < this->trips.size())
+        write(fdata, this->trips[i]);
+      else
+        write(fdata, dump);
+    }
+
+    findex.close();
+    fdata.close();
   }
 };
 
