@@ -12,10 +12,9 @@ class NodeLeaf : public NodeBase {
       : index(index), data(data), nodeID(nodeID) {
     if (isNew) {
       // New nodeLeaf
-      this->mbr = MBR(Point(-1, -1));
-
       this->nodeLeafBucket.M = M;
       this->nodeLeafBucket.m = M / 2;
+      this->nodeLeafBucket.mbr = MBR(Point(-1, -1));
       this->nodeLeafBucket.vectorsSize = 0;
       this->download(isNew);
     } else {
@@ -26,36 +25,44 @@ class NodeLeaf : public NodeBase {
   }
 
   uint getSize() override { return this->trips.size(); }
-  MBR getMBR() { return this->mbr; }
+  MBR getMBR() override { return this->nodeLeafBucket.mbr; }
 
   void insertTrip(Trip trip) override {
     this->trips.push_back(trip);
     if (trips.size() == 1) {
-      this->mbr = MBR(trip.getPoint());
+      this->nodeLeafBucket.mbr = MBR(trip.getPoint());
     } else {
-      if (trip.getLon() > this->mbr.getFinLon()) {
-        if (trip.getLat() > this->mbr.getFinLat()) {
-          this->mbr.setFin(trip.getLon(), trip.getLat());
-        } else if (trip.getLat() < this->mbr.getIniLat()) {
-          this->mbr.setIni(this->mbr.getIniLon(), trip.getLat());
-          this->mbr.setFin(trip.getLon(), this->mbr.getFinLat());
+      if (trip.getLon() > this->nodeLeafBucket.mbr.getFinLon()) {
+        if (trip.getLat() > this->nodeLeafBucket.mbr.getFinLat()) {
+          this->nodeLeafBucket.mbr.setFin(trip.getLon(), trip.getLat());
+        } else if (trip.getLat() < this->nodeLeafBucket.mbr.getIniLat()) {
+          this->nodeLeafBucket.mbr.setIni(this->nodeLeafBucket.mbr.getIniLon(),
+                                          trip.getLat());
+          this->nodeLeafBucket.mbr.setFin(trip.getLon(),
+                                          this->nodeLeafBucket.mbr.getFinLat());
         } else {
-          this->mbr.setFin(trip.getLon(), this->mbr.getFinLat());
+          this->nodeLeafBucket.mbr.setFin(trip.getLon(),
+                                          this->nodeLeafBucket.mbr.getFinLat());
         }
-      } else if (trip.getLon() < this->mbr.getIni().getLon()) {
-        if (trip.getLat() > this->mbr.getFinLat()) {
-          this->mbr.setIni(trip.getLon(), this->mbr.getIniLat());
-          this->mbr.setFin(this->mbr.getFinLon(), trip.getLat());
-        } else if (trip.getLat() < this->mbr.getIniLat()) {
-          this->mbr.setIni(trip.getLon(), trip.getLat());
+      } else if (trip.getLon() < this->nodeLeafBucket.mbr.getIni().getLon()) {
+        if (trip.getLat() > this->nodeLeafBucket.mbr.getFinLat()) {
+          this->nodeLeafBucket.mbr.setIni(trip.getLon(),
+                                          this->nodeLeafBucket.mbr.getIniLat());
+          this->nodeLeafBucket.mbr.setFin(this->nodeLeafBucket.mbr.getFinLon(),
+                                          trip.getLat());
+        } else if (trip.getLat() < this->nodeLeafBucket.mbr.getIniLat()) {
+          this->nodeLeafBucket.mbr.setIni(trip.getLon(), trip.getLat());
         } else {
-          this->mbr.setIni(trip.getLon(), this->mbr.getIniLat());
+          this->nodeLeafBucket.mbr.setIni(trip.getLon(),
+                                          this->nodeLeafBucket.mbr.getIniLat());
         }
       } else {
-        if (trip.getLat() > this->mbr.getFinLat()) {
-          this->mbr.setFin(this->mbr.getFinLon(), trip.getLat());
-        } else if (trip.getLat() < this->mbr.getIniLat()) {
-          this->mbr.setIni(this->mbr.getIniLon(), trip.getLat());
+        if (trip.getLat() > this->nodeLeafBucket.mbr.getFinLat()) {
+          this->nodeLeafBucket.mbr.setFin(this->nodeLeafBucket.mbr.getFinLon(),
+                                          trip.getLat());
+        } else if (trip.getLat() < this->nodeLeafBucket.mbr.getIniLat()) {
+          this->nodeLeafBucket.mbr.setIni(this->nodeLeafBucket.mbr.getIniLon(),
+                                          trip.getLat());
         } else {
           // Está dentro del mbr
         }
@@ -72,9 +79,10 @@ class NodeLeaf : public NodeBase {
   void printNode() override {
     std::cout << "\nNode Leaf\n";
     std::cout << "nodeID: " << this->nodeID << "\n";
-    std::cout << "MBR: (" << this->mbr.getIniLon() << ", "
-              << this->mbr.getIniLat() << ") (" << this->mbr.getFinLon() << ", "
-              << this->mbr.getFinLat() << ")\n";
+    std::cout << "MBR: (" << this->nodeLeafBucket.mbr.getIniLon() << ", "
+              << this->nodeLeafBucket.mbr.getIniLat() << ") ("
+              << this->nodeLeafBucket.mbr.getFinLon() << ", "
+              << this->nodeLeafBucket.mbr.getFinLat() << ")\n";
     std::cout << "\tPrint bucket:\n";
     this->nodeLeafBucket.print();
     for (int i = 0; i < trips.size(); i++) {
@@ -84,12 +92,13 @@ class NodeLeaf : public NodeBase {
       trips[i].print();
     }
   }
+  void insertMBR(MBR mbr) override { /* Nothing */
+  }
 
  private:
   uint nodeID;
   NodeBucket nodeLeafBucket;
   std::vector<Trip> trips;
-  MBR mbr;
   std::string index;
   std::string data;
 
@@ -115,9 +124,6 @@ class NodeLeaf : public NodeBase {
 
     findex.close();
     fdata.close();
-
-    this->mbr = MBR(this->nodeLeafBucket.iniLon, this->nodeLeafBucket.iniLat,
-                    this->nodeLeafBucket.finLon, this->nodeLeafBucket.finLat);
   }
   void download(bool isNew) override {
     std::fstream findex;
@@ -138,10 +144,6 @@ class NodeLeaf : public NodeBase {
       fdata.seekp(indexBucket.posIni, std::ios::beg);
     }
     this->nodeLeafBucket.vectorsSize = this->trips.size();
-    this->nodeLeafBucket.iniLon = this->mbr.getIniLon();
-    this->nodeLeafBucket.iniLat = this->mbr.getIniLat();
-    this->nodeLeafBucket.finLon = this->mbr.getFinLon();
-    this->nodeLeafBucket.finLat = this->mbr.getFinLat();
 
     write(fdata, this->nodeLeafBucket);
 

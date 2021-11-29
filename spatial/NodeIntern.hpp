@@ -11,26 +11,23 @@ class NodeIntern : public NodeBase {
              bool isNew = false)
       : index(index), data(data), nodeID(nodeID) {
     if (isNew) {
-      // New nodeLeaf
-      this->mbr = MBR(Point(-1, -1));
-
+      // New nodeIntern
       this->nodeInternBucket.M = M;
       this->nodeInternBucket.m = M / 2;
+      this->nodeInternBucket.mbr = MBR(Point(-1, -1));
       this->nodeInternBucket.vectorsSize = 0;
       this->download(isNew);
     } else {
-      // Load existing nodeLeaf
+      // Load existing nodeIntern
       std::cout << "Load nodeIntern\n";
       this->load();
     }
   }
 
-  void readToFile() override {}
-  void writeToFile() override {}
-
   uint getSize() override { return 0; }
+  MBR getMBR() override { return this->nodeInternBucket.mbr; }
 
-  void insertMBR(MBR mbr) {
+  void insertMBR(MBR mbr) override {
     if (!MBRs.empty()) {
       this->MBRs.push_back(mbr);
       this->children.push_back(this->MBRs.size());
@@ -38,6 +35,9 @@ class NodeIntern : public NodeBase {
       std::cout << "Split nodeIntern";
     }
   }
+
+  void readToFile() override {}
+  void writeToFile() override {}
 
   void printNode() override {
     std::cout << "\nNode Intern\n";
@@ -57,7 +57,6 @@ class NodeIntern : public NodeBase {
   NodeBucket nodeInternBucket;
   std::vector<MBR> MBRs;
   std::vector<uint> children;
-  MBR mbr;
   std::string index;
   std::string data;
 
@@ -87,10 +86,6 @@ class NodeIntern : public NodeBase {
 
     findex.close();
     fdata.close();
-
-    this->mbr =
-        MBR(this->nodeInternBucket.iniLon, this->nodeInternBucket.iniLat,
-            this->nodeInternBucket.finLon, this->nodeInternBucket.finLat);
   }
 
   void download(bool isNew) override {
@@ -113,10 +108,6 @@ class NodeIntern : public NodeBase {
     }
 
     this->nodeInternBucket.vectorsSize = this->MBRs.size();
-    this->nodeInternBucket.iniLon = this->mbr.getIniLon();
-    this->nodeInternBucket.iniLat = this->mbr.getIniLat();
-    this->nodeInternBucket.finLon = this->mbr.getFinLon();
-    this->nodeInternBucket.finLat = this->mbr.getFinLat();
 
     write(fdata, this->nodeInternBucket);
 

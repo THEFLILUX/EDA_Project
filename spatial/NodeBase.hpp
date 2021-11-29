@@ -20,6 +20,8 @@ class NodeBase {
   virtual void writeToFile() = 0;
 
   virtual uint getSize() = 0;
+  virtual MBR getMBR() = 0;
+  virtual void insertMBR(MBR mbr) = 0;
 
  private:
   virtual void load() = 0;
@@ -58,18 +60,16 @@ class NodeBucket {
  public:
   uint M;
   uint m;
-  double iniLon;
-  double iniLat;
-  double finLon;
-  double finLat;
+  MBR mbr;
   uint vectorsSize;
 
   NodeBucket() {}
   void print() {
     std::cout << "M: " << this->M << "\n";
     std::cout << "m: " << this->m << "\n";
-    std::cout << "MBR: (" << this->iniLon << ", " << this->iniLat << ") ("
-              << this->finLon << ", " << this->finLat << ")\n";
+    std::cout << "MBR: (" << this->mbr.getIniLon() << ", "
+              << this->mbr.getIniLat() << ") (" << this->mbr.getFinLon() << ", "
+              << this->mbr.getFinLat() << ")\n";
     std::cout << "vectorsSize: " << this->vectorsSize << "\n";
   }
 };
