@@ -9,31 +9,31 @@
 using namespace utec::spatial;
 
 TEST(FirstTest, BasicTest) {
-  /*  uint Mleaf = 4;
+  uint Mleaf = 4;
   uint Mintern = 6;
   std::string path = "../tests/RTree/";
 
   RTree rtree(path, Mleaf, Mintern);
-  std::cout << "\n1er print\n";
-  rtree.printTree();
 
-  Trip trip(2, 5, "path1", 11, 12);
+  Trip trip(1, 1, "path1", 11, 12);
   rtree.insertTrip(trip);
 
-  std::cout << "\n2do print\n";
-  rtree.printTree();
+  trip.setParam(2, 2, "path2", 21, 22);
+  rtree.insertTrip(trip);
 
-  Trip trip2(1, 8, "path2", 13, 14);
-  rtree.insertTrip(trip2);
+  trip.setParam(10, 10, "path3", 31, 32);
+  rtree.insertTrip(trip);
 
-  std::cout << "\n3er print\n";
-  rtree.printTree();
-  rtree.writeToFile();
-  */
-  std::string path = "../tests/RTree/";
+  trip.setParam(11, 12, "path4", 41, 42);
+  rtree.insertTrip(trip);
 
-  RTree rtree(path);
   std::cout << "\n1er print\n";
+  rtree.printTree();
+
+  trip.setParam(13, 14, "path5", 51, 52);
+  rtree.insertTrip(trip);
+
+  std::cout << "\n2nd print\n";
   rtree.printTree();
 
   EXPECT_TRUE(1);

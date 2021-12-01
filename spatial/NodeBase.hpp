@@ -21,7 +21,13 @@ class NodeBase {
 
   virtual uint getSize() = 0;
   virtual MBR getMBR() = 0;
-  virtual void insertMBR(MBR mbr) = 0;
+  virtual void insertMBR(MBR mbr, uint child) = 0;
+  virtual void resetVectors() = 0;
+  virtual uint getNodeID() = 0;
+
+  virtual std::vector<Trip> getTrips() = 0;
+  virtual std::vector<MBR> getMBRs() = 0;
+  virtual std::vector<uint> getChildren() = 0;
 
  private:
   virtual void load() = 0;
@@ -65,12 +71,13 @@ class NodeBucket {
 
   NodeBucket() {}
   void print() {
-    std::cout << "M: " << this->M << "\n";
-    std::cout << "m: " << this->m << "\n";
-    std::cout << "MBR: (" << this->mbr.getIniLon() << ", "
+    std::cout << "\tPrint bucket:\n";
+    std::cout << "\tM: " << this->M << "\n";
+    std::cout << "\tm: " << this->m << "\n";
+    std::cout << "\tMBR: (" << this->mbr.getIniLon() << ", "
               << this->mbr.getIniLat() << ") (" << this->mbr.getFinLon() << ", "
               << this->mbr.getFinLat() << ")\n";
-    std::cout << "vectorsSize: " << this->vectorsSize << "\n";
+    std::cout << "\tvectorsSize: " << this->vectorsSize << "\n";
   }
 };
 

@@ -11,7 +11,7 @@ class Trip {
     for (int i = 0; i < PATH_LENGTH; i++) this->path[i] = '.';
     this->path[PATH_LENGTH] = '\0';
   }
-  Trip(double lon, double lat, std::string path, uint tripIni, uint tripOffset)
+  Trip(dist_t lon, dist_t lat, std::string path, uint tripIni, uint tripOffset)
       : point(Point(lon, lat)), tripIni(tripIni), tripOffset(tripOffset) {
     for (int i = 0; i < PATH_LENGTH; i++) {
       if (i < path.size())
@@ -34,21 +34,23 @@ class Trip {
   uint getTripInit() { return this->tripIni; }
   uint getTripOffset() { return this->tripOffset; }
   Point getPoint() { return this->point; }
-  double getLon() { return this->point.getLon(); }
-  double getLat() { return this->point.getLat(); }
-  void setParam(double lon, double lat, std::string path, uint tripIni,
+  dist_t getLon() { return this->point.getLon(); }
+  dist_t getLat() { return this->point.getLat(); }
+  void setParam(dist_t lon, dist_t lat, std::string path, uint tripIni,
                 uint tripOffset) {
     this->point = Point(lon, lat);
     strncpy(this->path, path.c_str(), path.size());
     this->tripIni = tripIni;
     this->tripOffset = tripOffset;
   }
-  friend double operator-(const Trip& a, const Trip& b) {
-    return a.point - b.point;
-  }
   void print() {
     std::cout << " PATH: " << this->path << "(" << strlen(this->path) << ")\n";
   }
+  friend dist_t operator-(const Trip& a, const Trip& b) {
+    return a.point - b.point;
+  }
+  friend dist_t operator-(const Trip& a, const Point& b) { return a.point - b; }
+  friend dist_t operator-(const Point& a, const Trip& b) { return a - b.point; }
 
  private:
   Point point;

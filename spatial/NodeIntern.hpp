@@ -24,33 +24,49 @@ class NodeIntern : public NodeBase {
     }
   }
 
-  uint getSize() override { return 0; }
+  uint getSize() override { return this->MBRs.size(); }
   MBR getMBR() override { return this->nodeInternBucket.mbr; }
+  uint getNodeID() override { return this->nodeID; }
+  std::vector<MBR> getMBRs() override { return this->MBRs; }
+  std::vector<uint> getChildren() override { return this->children; }
 
-  void insertMBR(MBR mbr) override {
-    if (!MBRs.empty()) {
-      this->MBRs.push_back(mbr);
-      this->children.push_back(this->MBRs.size());
-    } else {
-      std::cout << "Split nodeIntern";
+  void insertMBR(MBR mbr, uint child) override {
+    if (this->MBRs.size() == 0)
+      this->nodeInternBucket.mbr = mbr;
+    else {
+      // Unir MBRs
+      this->nodeInternBucket.mbr = this->nodeInternBucket.mbr * mbr.getIni();
+      this->nodeInternBucket.mbr = this->nodeInternBucket.mbr * mbr.getFin();
     }
+    this->MBRs.push_back(mbr);
+    this->children.push_back(child);
   }
 
   void readToFile() override {}
-  void writeToFile() override {}
+  void writeToFile() override {
+    std::cout << "Writing NodeIntern to file\n";
+    this->download(false);
+  }
 
   void printNode() override {
-    std::cout << "\nNode Intern\n";
+    std::cout << "\nPrint Node Intern\n";
     std::cout << "nodeID: " << this->nodeID << "\n";
     this->nodeInternBucket.print();
-    for (int i = 0; i < MBRs.size(); i++) {
+    std::cout << "Size: " << this->MBRs.size() << "\n";
+    for (int i = 0; i < this->MBRs.size(); i++) {
       std::cout << "\tMBR " << i << ": (" << MBRs[i].getIniLon() << ", "
                 << MBRs[i].getIniLat() << ") (" << MBRs[i].getFinLon() << ", "
                 << MBRs[i].getFinLat() << ") Child: " << children[i] << "\n";
     }
   }
+  void resetVectors() override {
+    this->MBRs.clear();
+    this->children.clear();
+    this->nodeInternBucket.mbr = MBR(Point(-1, -1));
+  }
   void insertTrip(Trip trip) override { /* Nothing */
   }
+  std::vector<Trip> getTrips() override { return {}; }
 
  private:
   uint nodeID;

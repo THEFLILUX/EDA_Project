@@ -3,6 +3,7 @@
 #include <math.h>
 
 #include <iostream>
+#define dist_t double
 
 namespace utec {
 namespace spatial {
@@ -10,12 +11,12 @@ namespace spatial {
 class Point {
  public:
   Point() : lon(0.0), lat(0.0) {}
-  Point(double lon, double lat) : lon(lon), lat(lat) {}
+  Point(dist_t lon, dist_t lat) : lon(lon), lat(lat) {}
   Point(const Point& o) : lon(o.lon), lat(o.lat) {}
-  double getLon() { return this->lon; }
-  double getLat() { return this->lat; }
-  void setLon(double lon) { this->lon = lon; }
-  void setLat(double lon) { this->lat = lat; }
+  dist_t getLon() { return this->lon; }
+  dist_t getLat() { return this->lat; }
+  void setLon(dist_t lon) { this->lon = lon; }
+  void setLat(dist_t lon) { this->lat = lat; }
 
   Point& operator=(const Point& o) {
     this->lon = o.lon;
@@ -28,14 +29,14 @@ class Point {
   friend bool operator!=(const Point& a, const Point& b) {
     return a.lon != b.lon || a.lat != b.lat;
   }
-  friend double operator-(const Point& a, const Point& b) {
+  friend dist_t operator-(const Point& a, const Point& b) {
     return sqrt((a.lon - b.lon) * (a.lon - b.lon) +
                 (a.lat - b.lat) * (a.lat - b.lat));
   }
 
  private:
-  double lon;
-  double lat;
+  dist_t lon;
+  dist_t lat;
 };
 
 }  // namespace spatial
