@@ -12,6 +12,7 @@ class NodeIntern : public NodeBase {
       : index(index), data(data), nodeID(nodeID) {
     if (isNew) {
       // New nodeIntern
+      std::cout << "New nodeIntern\n";
       this->nodeInternBucket.M = M;
       this->nodeInternBucket.m = M / 2;
       // this->nodeInternBucket.mbr = MBR(MBRNULL);

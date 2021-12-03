@@ -12,6 +12,7 @@ class NodeLeaf : public NodeBase {
       : index(index), data(data), nodeID(nodeID) {
     if (isNew) {
       // New nodeLeaf
+      std::cout << "New nodeLeaf\n";
       this->nodeLeafBucket.M = M;
       this->nodeLeafBucket.m = M / 2;
       // this->nodeLeafBucket.mbr = MBR(MBRNULL);

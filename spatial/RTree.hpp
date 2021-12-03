@@ -60,7 +60,6 @@ class RTree {
       std::cout
           << "Not exists, creating index and data files in root constructor\n";
       // New Rtree
-      std::cout << "New RTree\n";
       this->rootBucket.Mleaf = Mleaf;
       this->rootBucket.mleaf = Mleaf / 2;
       this->rootBucket.Mintern = Mintern;
@@ -153,6 +152,26 @@ class RTree {
     } else {
       MBR mbr1(MBRNULL), mbr2(MBRNULL);
       this->insertTripRec(this->rootBucket.rootNumber, trip, mbr1, mbr2);
+      if (mbr1 != mbr2) {
+        // Hubo un split, nuevo nodo raíz
+        this->close();
+        this->loadNodeInNodePtr(this->rootBucket.rootNumber);
+        this->rootBucket.rootNumber = this->rootBucket.nextNodeNumber;
+
+        NodeBase* newNodeInternRoot = new NodeIntern(
+            this->rootPath + this->indexName, this->rootPath + this->dataName,
+            this->rootBucket.nextNodeNumber++, this->rootBucket.Mintern, true);
+        this->open();
+
+        newNodeInternRoot->insertMBR(mbr1, this->nodePtr->getNodeID());
+        newNodeInternRoot->insertMBR(mbr2, this->rootBucket.rootNumber - 1);
+
+        // Regresar a memoria secundaria
+        this->close();
+        newNodeInternRoot->writeToFile();
+        this->nodePtr->writeToFile();
+        this->open();
+      }
     }
   }
 
@@ -248,6 +267,13 @@ void RTree::insertTripRec(uint nodeNumber, Trip trip, MBR& mbr1, MBR& mbr2) {
       MBR mbr1Tmp(MBRNULL), mbr2Tmp(MBRNULL);
       this->splitNodeLeaf(this->nodePtr, newNodeLeaf, mbr1Tmp, mbr2Tmp);
       std::cout << "Fin leaf node split\n";
+
+      // Regresar a memoria secundaria nuevo nodo
+      this->close();
+      newNodeLeaf->writeToFile();
+      this->nodePtr->writeToFile();
+      this->open();
+
       mbr1 = mbr1Tmp;
       mbr2 = mbr2Tmp;
     }
@@ -281,6 +307,12 @@ void RTree::insertTripRec(uint nodeNumber, Trip trip, MBR& mbr1, MBR& mbr2) {
                                   mbr2Tmp2);
             mbr1 = mbr1Tmp2;
             mbr2 = mbr2Tmp2;
+
+            // Regresar a memoria secundaria nuevo nodo
+            this->close();
+            newNodeIntern->writeToFile();
+            this->nodePtr->writeToFile();
+            this->open();
           }
         }
         return;
@@ -319,6 +351,12 @@ void RTree::insertTripRec(uint nodeNumber, Trip trip, MBR& mbr1, MBR& mbr2) {
         this->splitNodeIntern(this->nodePtr, newNodeIntern, mbr1Tmp2, mbr2Tmp2);
         mbr1 = mbr1Tmp2;
         mbr2 = mbr2Tmp2;
+
+        // Regresar a memoria secundaria nuevo nodo
+        this->close();
+        newNodeIntern->writeToFile();
+        this->nodePtr->writeToFile();
+        this->open();
       }
     }
   }
