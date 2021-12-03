@@ -4,6 +4,8 @@
 
 #include <iostream>
 #define dist_t double
+#define PI 3.14159265358979323846
+#define EARTH_RADIUS_IN_METERS 6372797.560856
 
 namespace utec {
 namespace spatial {
@@ -34,8 +36,17 @@ class Point {
     return a.lon != b.lon || a.lat != b.lat;
   }
   friend dist_t operator-(const Point& a, const Point& b) {
-    return sqrt((a.lon - b.lon) * (a.lon - b.lon) +
-                (a.lat - b.lat) * (a.lat - b.lat));
+    // return sqrt((a.lon - b.lon) * (a.lon - b.lon) + (a.lat - b.lat) * (a.lat
+    // - b.lat));
+    dist_t lat_arc = (a.lat - b.lat) * PI / 180;
+    dist_t lon_arc = (a.lon - b.lon) * PI / 180;
+    dist_t lat_h = sin(lat_arc * 0.5);
+    dist_t lon_h = sin(lon_arc * 0.5);
+
+    return EARTH_RADIUS_IN_METERS * 2.0 *
+           asin(sqrt(lat_h * lat_h +
+                     (cos(a.lat * PI / 180) * cos(b.lat * PI / 180)) * lon_h *
+                         lon_h));
   }
 
  private:

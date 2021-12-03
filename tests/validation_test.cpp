@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-#include "RTree.hpp"
+#include "BigRTree.hpp"
 
 // Referencia: file = "../tests/images/test8/img8";
 
@@ -19,6 +19,10 @@ TEST(FirstTest, BasicTest) {
 
   RTree rtree(path, Mleaf, Mintern);
 
+  BigRTree bigRTree(rtree);
+  bigRTree.loadFile("../tests/RTree/test.csv");
+
+  /*
   Trip trip(1, 1, "path1", 11, 12);
   rtree.insertTrip(trip);
   trip.setParam(2, 2, "path2", 21, 22);
@@ -65,7 +69,7 @@ TEST(FirstTest, BasicTest) {
   rtree.insertTrip(trip);
 
   std::cout << "\n6to print\n";
-  rtree.printTree();
+  rtree.printTree();*/
 
   EXPECT_TRUE(1);
 }
