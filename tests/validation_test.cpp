@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <stdio.h>
 
 #include <iostream>
 
@@ -9,8 +10,19 @@
 using namespace utec::spatial;
 
 TEST(FirstTest, BasicTest) {
+  int status = remove("../tests/RTree//data.rtree");
+  if (status == 0)
+    std::cout << "Borrado 1\n";
+  else
+    exit(0);
+  status = remove("../tests/RTree//index.rtree");
+  if (status == 0)
+    std::cout << "Borrado 2\n";
+  else
+    exit(0);
+
   uint Mleaf = 4;
-  uint Mintern = 6;
+  uint Mintern = 4;
   std::string path = "../tests/RTree/";
 
   RTree rtree(path, Mleaf, Mintern);

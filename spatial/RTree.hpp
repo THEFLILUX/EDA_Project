@@ -128,12 +128,12 @@ class RTree {
             this->rootBucket.nextNodeNumber++, this->rootBucket.Mintern, true);
         this->open();
 
-        this->splitNodeLeaf(this->nodePtr, newNodeLeaf);
+        MBR mbr1(MBRNULL), mbr2(MBRNULL);
 
-        newNodeIntern->insertMBR(this->nodePtr->getMBR(),
-                                 this->nodePtr->getNodeID());
-        newNodeIntern->insertMBR(newNodeLeaf->getMBR(),
-                                 newNodeLeaf->getNodeID());
+        this->splitNodeLeaf(this->nodePtr, newNodeLeaf, mbr1, mbr2);
+
+        newNodeIntern->insertMBR(mbr1, this->nodePtr->getNodeID());
+        newNodeIntern->insertMBR(mbr2, newNodeLeaf->getNodeID());
 
         // Regresar a memoria secundaria
         this->close();
@@ -151,7 +151,8 @@ class RTree {
         std::cout << "NodeLeaf root finish split\n";
       }
     } else {
-      this->insertTripRec(this->rootBucket.rootNumber, trip);
+      MBR mbr1(MBRNULL), mbr2(MBRNULL);
+      this->insertTripRec(this->rootBucket.rootNumber, trip, mbr1, mbr2);
     }
   }
 
@@ -204,6 +205,7 @@ class RTree {
     write(fdata, this->rootBucket);
   }
   void loadNodeInNodePtr(uint nodeNumber) {
+    if (this->nodePtr->getNodeID() == nodeNumber) return;
     findex.seekg((nodeNumber - 1) * sizeof(IndexBucket), std::ios::beg);
     read(findex, this->indexBucket);
     this->close();
@@ -221,13 +223,15 @@ class RTree {
     this->open();
   }
 
-  void insertTripRec(uint nodeNumber, Trip trip);
-  void splitNodeLeaf(NodeBase*& firstNode, NodeBase*& secondNode);
-  void splitNodeIntern(NodeBase*& firstNode, NodeBase*& secondNode);
+  void insertTripRec(uint nodeNumber, Trip trip, MBR& mbr1, MBR& mbr2);
+  void splitNodeLeaf(NodeBase*& firstNode, NodeBase*& secondNode, MBR& mbr1,
+                     MBR& mbr2);
+  void splitNodeIntern(NodeBase*& firstNode, NodeBase*& secondNode, MBR& mbr1,
+                       MBR& mbr2);
   void printRec(uint nodeNumber);
 };
 
-void RTree::insertTripRec(uint nodeNumber, Trip trip) {
+void RTree::insertTripRec(uint nodeNumber, Trip trip, MBR& mbr1, MBR& mbr2) {
   // Cargar el node
   this->loadNodeInNodePtr(nodeNumber);
 
@@ -241,14 +245,86 @@ void RTree::insertTripRec(uint nodeNumber, Trip trip) {
           this->rootPath + this->indexName, this->rootPath + this->dataName,
           this->rootBucket.nextNodeNumber++, this->rootBucket.Mleaf, true);
       this->open();
-      this->splitNodeLeaf(this->nodePtr, newNodeLeaf);
-      // Cambiar root al node Intern
-
+      MBR mbr1Tmp(MBRNULL), mbr2Tmp(MBRNULL);
+      this->splitNodeLeaf(this->nodePtr, newNodeLeaf, mbr1Tmp, mbr2Tmp);
       std::cout << "Fin leaf node split\n";
+      mbr1 = mbr1Tmp;
+      mbr2 = mbr2Tmp;
+    }
+  } else {
+    // Nodo intern
+    std::vector<MBR> MBRs = this->nodePtr->getMBRs();
+    std::vector<uint> children = this->nodePtr->getChildren();
+    for (uint i = 0; i < MBRs.size(); i++) {
+      if (MBRs[i] - trip == 0) {
+        MBR mbr1Tmp(MBRs[i]), mbr2Tmp(MBRs[i]);
+        this->insertTripRec(children[i], trip, mbr1Tmp, mbr2Tmp);
+        if (mbr1Tmp != mbr2Tmp) {
+          // Hubo un split
+          this->loadNodeInNodePtr(nodeNumber);
+
+          this->nodePtr->updateMBRbyIndex(i, mbr1Tmp);
+          this->nodePtr->insertMBR(mbr2Tmp,
+                                   this->rootBucket.nextNodeNumber - 1);
+          if (this->nodePtr->getSize() == this->rootBucket.Mintern + 1) {
+            // Split intern node
+            std::cout << "NodeIntern split required\n";
+            this->close();
+            NodeBase* newNodeIntern =
+                new NodeIntern(this->rootPath + this->indexName,
+                               this->rootPath + this->dataName,
+                               this->rootBucket.nextNodeNumber++,
+                               this->rootBucket.Mintern, true);
+            this->open();
+            MBR mbr1Tmp2(MBRNULL), mbr2Tmp2(MBRNULL);
+            this->splitNodeIntern(this->nodePtr, newNodeIntern, mbr1Tmp2,
+                                  mbr2Tmp2);
+            mbr1 = mbr1Tmp2;
+            mbr2 = mbr2Tmp2;
+          }
+        }
+        return;
+      }
+    }
+    // No entró en ningún MBR
+    // escoger el MBR que se expanda menos
+    double minExpansion = MBRs[0] / trip;
+    uint ind = 0;
+    for (uint i = 1; i < MBRs.size(); i++) {
+      double locExpansion = MBRs[i] / trip;
+      if (locExpansion < minExpansion) {
+        minExpansion = locExpansion;
+        ind = i;
+      }
+    }
+    MBR newMBR = MBRs[ind] * trip;
+    this->nodePtr->updateMBRbyIndex(ind, newMBR);
+    MBR mbr1Tmp(newMBR), mbr2Tmp(newMBR);
+    this->insertTripRec(children[ind], trip, mbr1Tmp, mbr2Tmp);
+    if (mbr1Tmp != mbr2Tmp) {
+      // Hubo un split
+      this->loadNodeInNodePtr(nodeNumber);
+
+      this->nodePtr->updateMBRbyIndex(ind, mbr1Tmp);
+      this->nodePtr->insertMBR(mbr2Tmp, this->rootBucket.nextNodeNumber - 1);
+      if (this->nodePtr->getSize() == this->rootBucket.Mintern + 1) {
+        // Split intern node
+        std::cout << "NodeIntern split required\n";
+        this->close();
+        NodeBase* newNodeIntern = new NodeIntern(
+            this->rootPath + this->indexName, this->rootPath + this->dataName,
+            this->rootBucket.nextNodeNumber++, this->rootBucket.Mintern, true);
+        this->open();
+        MBR mbr1Tmp2(MBRNULL), mbr2Tmp2(MBRNULL);
+        this->splitNodeIntern(this->nodePtr, newNodeIntern, mbr1Tmp2, mbr2Tmp2);
+        mbr1 = mbr1Tmp2;
+        mbr2 = mbr2Tmp2;
+      }
     }
   }
 }
-void RTree::splitNodeLeaf(NodeBase*& firstNode, NodeBase*& secondNode) {
+void RTree::splitNodeLeaf(NodeBase*& firstNode, NodeBase*& secondNode,
+                          MBR& mbr1, MBR& mbr2) {
   std::vector<Trip> trips = firstNode->getTrips();
   firstNode->resetVectors();
 
@@ -267,8 +343,17 @@ void RTree::splitNodeLeaf(NodeBase*& firstNode, NodeBase*& secondNode) {
       }
     }
   }
-  firstNode->insertTrip(trip1);
-  secondNode->insertTrip(trip2);
+  if (trip1.getLon() < trip2.getLon()) {
+    firstNode->insertTrip(trip1);
+    secondNode->insertTrip(trip2);
+    mbr1 *= trip1;
+    mbr2 *= trip2;
+  } else {
+    firstNode->insertTrip(trip2);
+    secondNode->insertTrip(trip1);
+    mbr1 *= trip2;
+    mbr2 *= trip1;
+  }
 
   std::unordered_set<uint> inserted;
   inserted.insert(ind1);
@@ -279,8 +364,8 @@ void RTree::splitNodeLeaf(NodeBase*& firstNode, NodeBase*& secondNode) {
     dist_t dist_min = -1;
     for (uint i = 0; i < trips.size(); i++) {
       if (inserted.count(i) > 0) continue;
-      dist_t dist1 = firstNode->getMBR() - trips[i];
-      dist_t dist2 = secondNode->getMBR() - trips[i];
+      dist_t dist1 = mbr1 - trips[i];
+      dist_t dist2 = mbr2 - trips[i];
       if (dist_min == -1) {
         ind = i;
         if (dist1 < dist2) {
@@ -303,10 +388,13 @@ void RTree::splitNodeLeaf(NodeBase*& firstNode, NodeBase*& secondNode) {
         }
       }
     }
-    if (toFirst)
+    if (toFirst) {
       firstNode->insertTrip(trips[ind]);
-    else
+      mbr1 *= trips[ind];
+    } else {
       secondNode->insertTrip(trips[ind]);
+      mbr2 *= trips[ind];
+    }
     inserted.insert(ind);
     if (trips.size() - std::max(firstNode->getSize(), secondNode->getSize()) ==
         this->rootBucket.mleaf)
@@ -316,14 +404,111 @@ void RTree::splitNodeLeaf(NodeBase*& firstNode, NodeBase*& secondNode) {
   if (inserted.size() < trips.size()) {
     for (uint i = 0; i < trips.size(); i++) {
       if (inserted.count(i) > 0) continue;
-      if (toFirst)
+      if (toFirst) {
         firstNode->insertTrip(trips[i]);
-      else
+        mbr1 *= trips[i];
+      } else {
         secondNode->insertTrip(trips[i]);
+        mbr2 *= trips[i];
+      }
     }
   }
 }
-void RTree::splitNodeIntern(NodeBase*& firstNode, NodeBase*& secondNode) {}
+void RTree::splitNodeIntern(NodeBase*& firstNode, NodeBase*& secondNode,
+                            MBR& mbr1, MBR& mbr2) {
+  std::vector<MBR> MBRs = firstNode->getMBRs();
+  std::vector<uint> children = firstNode->getChildren();
+  firstNode->resetVectors();
+
+  MBR mbrTmp1(MBRNULL), mbrTmp2(MBRNULL);
+  uint ind1, ind2;
+  dist_t maxMBRDistance = 0;
+  for (uint i = 0; i < MBRs.size(); i++) {
+    for (uint j = i + 1; j < MBRs.size(); j++) {
+      dist_t localDistance = MBRs[i] - MBRs[j];
+      if (localDistance > maxMBRDistance) {
+        mbrTmp1 = MBRs[i];
+        mbrTmp2 = MBRs[j];
+        ind1 = i;
+        ind2 = j;
+        maxMBRDistance = localDistance;
+      }
+    }
+  }
+  ///*///*////
+  if (mbrTmp1.getIniLon() < mbrTmp2.getIniLon() ||
+      (mbrTmp1.getIniLon() == mbrTmp2.getIniLon() &&
+       mbrTmp1.getIniLat() < mbrTmp2.getIniLat())) {
+    firstNode->insertMBR(mbrTmp1, children[ind1]);
+    secondNode->insertMBR(mbrTmp2, children[ind2]);
+    mbr1 *= mbrTmp1;
+    mbr2 *= mbrTmp2;
+  } else {
+    firstNode->insertMBR(mbrTmp2, children[ind2]);
+    secondNode->insertMBR(mbrTmp1, children[ind1]);
+    mbr1 *= mbrTmp1;
+    mbr2 *= mbrTmp2;
+  }
+
+  std::unordered_set<uint> inserted;
+  inserted.insert(ind1);
+  inserted.insert(ind2);
+  bool toFirst;
+  while (inserted.size() < MBRs.size()) {
+    uint ind = 0;
+    dist_t dist_min = -1;
+    for (uint i = 0; i < MBRs.size(); i++) {
+      if (inserted.count(i) > 0) continue;
+      dist_t dist1 = mbr1 - MBRs[i];
+      dist_t dist2 = mbr2 - MBRs[i];
+      if (dist_min == -1) {
+        ind = i;
+        if (dist1 < dist2) {
+          dist_min = dist1;
+          toFirst = true;
+        } else {
+          dist_min = dist2;
+          toFirst = false;
+        }
+      } else {
+        if (dist1 < dist_min) {
+          dist_min = dist1;
+          toFirst = true;
+          ind = i;
+        }
+        if (dist2 < dist_min) {
+          dist_min = dist2;
+          toFirst = false;
+          ind = i;
+        }
+      }
+    }
+    if (toFirst) {
+      firstNode->insertMBR(MBRs[ind], children[ind]);
+      mbr1 *= MBRs[ind];
+    } else {
+      secondNode->insertMBR(MBRs[ind], children[ind]);
+      mbr2 *= MBRs[ind];
+    }
+    inserted.insert(ind);
+    if (MBRs.size() - std::max(firstNode->getSize(), secondNode->getSize()) ==
+        this->rootBucket.mintern)
+      break;
+  }
+  toFirst = firstNode->getSize() < secondNode->getSize();
+  if (inserted.size() < MBRs.size()) {
+    for (uint i = 0; i < MBRs.size(); i++) {
+      if (inserted.count(i) > 0) continue;
+      if (toFirst) {
+        firstNode->insertMBR(MBRs[i], children[i]);
+        mbr1 *= MBRs[i];
+      } else {
+        secondNode->insertMBR(MBRs[i], children[i]);
+        mbr2 *= MBRs[i];
+      }
+    }
+  }
+}
 void RTree::printRec(uint nodeNumber) {
   // Cargar el node
   this->loadNodeInNodePtr(nodeNumber);

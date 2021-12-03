@@ -16,7 +16,11 @@ class Point {
   dist_t getLon() { return this->lon; }
   dist_t getLat() { return this->lat; }
   void setLon(dist_t lon) { this->lon = lon; }
-  void setLat(dist_t lon) { this->lat = lat; }
+  void setLat(dist_t lat) { this->lat = lat; }
+  void setParam(dist_t lon, dist_t lat) {
+    this->lon = lon;
+    this->lat = lat;
+  }
 
   Point& operator=(const Point& o) {
     this->lon = o.lon;
