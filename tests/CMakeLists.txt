@@ -4,8 +4,8 @@ function(ConfigureTest CMAKE_TEST_NAME)
   ADD_TEST(NAME ${CMAKE_TEST_NAME} COMMAND ${CMAKE_TEST_NAME})
 endfunction()
 
-INCLUDE_DIRECTORIES(../csv-parser)  
 INCLUDE_DIRECTORIES(../spatial)
+INCLUDE_DIRECTORIES(../csv-parser/include)
 
 ConfigureTest(validation_test
   validation_test.cpp
