@@ -96,6 +96,8 @@ class RTree {
           this->rootBucket.rootNumber, this->rootBucket.Mintern);
     }
     this->open();
+
+    this->loadNodeInNodePtr(this->rootBucket.rootNumber, false);
   }
   ~RTree() {
     findex.close();
@@ -224,8 +226,8 @@ class RTree {
 
     write(fdata, this->rootBucket);
   }
-  void loadNodeInNodePtr(uint nodeNumber) {
-    if (this->nodePtr->getNodeID() == nodeNumber) return;
+  void loadNodeInNodePtr(uint nodeNumber, bool first = true) {
+    if (first && this->nodePtr->getNodeID() == nodeNumber) return;
 
     findex.seekg((nodeNumber - 1) * sizeof(IndexBucket), std::ios::beg);
     read(findex, this->indexBucket);
@@ -570,6 +572,7 @@ void RTree::printRec(uint nodeNumber) {
 void RTree::rangeSearchRec(std::vector<Trip>& result, MBR& mbr,
                            uint nodeNumber) {
   // Cargar el node
+  // std::cout << "nodeNumber: " << nodeNumber << "\n";
   this->loadNodeInNodePtr(nodeNumber);
 
   if (this->indexBucket.isNodeLeaf) {

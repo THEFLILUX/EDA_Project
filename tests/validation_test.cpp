@@ -29,33 +29,31 @@ TEST(FirstTest, BasicTest) {
   std::string path = "../tests/RTree/";
   RTree rtree(path);
   rtree.printTree();
+  //-73.960029602050781,40.814136505126953
+  std::vector<Trip> trips =
+      rtree.rangeSearch(Point(-73.91, 40.80), Point(-73.90, 40.81));
 
-  /*  std::vector<Trip> trips =
-        rtree.rangeSearch(Point(-73.98574, 40.69963),
-    Point(-73.90955, 40.7604));
+  std::cout << "Query: " << trips.size() << "\n";
 
-    std::cout << "Query: " << trips.size() << "\n";
+  std::cout << "\n";
 
-    std::cout << "\n";
+  std::fstream f;
+  std::string path2 = "../tests/RTree/test.csv";
+  f.open(path2, std::ios::in);
 
-    std::fstream f;
-    std::string path2 = "../tests/RTree/test.csv";
-    f.open(path2, std::ios::in);
+  for (Trip trip : trips) {
+    f.seekg(trip.getTripInit(), std::ios::beg);
+    uint tam = trip.getTripOffset() - trip.getTripInit() - 1;
+    char* buffer = new char[tam + 1];
+    f.read(buffer, tam);
+    buffer[tam] = '\0';
+    std::string row = buffer;
+    delete buffer;
+    std::cout << row << "\n";
+  }
+  f.close();
 
-    for (Trip trip : trips) {
-      f.seekg(trip.getTripInit(), std::ios::beg);
-      uint tam = trip.getTripOffset() - trip.getTripInit() - 1;
-      char* buffer = new char[tam + 1];
-      f.read(buffer, tam);
-      buffer[tam] = '\0';
-      std::string row = buffer;
-      delete buffer;
-      std::cout << row << "\n";
-      std::cout << "First: " << row[0] << "\n";
-    }
-    f.close();
-  */
-
+  std::cout << "Fin test\n";
   /*
   Trip trip(1, 1, "path1", 11, 12);
   rtree.insertTrip(trip);
