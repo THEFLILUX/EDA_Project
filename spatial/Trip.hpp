@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Point.hpp"
-#define PATH_LENGTH 15
+#define PATH_LENGTH 49
 namespace utec {
 namespace spatial {
 

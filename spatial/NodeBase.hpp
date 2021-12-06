@@ -16,7 +16,6 @@ class NodeBase {
   virtual void printNode() = 0;
   virtual void insertTrip(Trip trip) = 0;
 
-  virtual void readToFile() = 0;
   virtual void writeToFile() = 0;
 
   virtual uint getSize() = 0;

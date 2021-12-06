@@ -10,17 +10,51 @@
 using namespace utec::spatial;
 
 TEST(FirstTest, BasicTest) {
-  int status = remove("../tests/RTree//data.rtree");
+  // Load data to rtree
+  /*int status = remove("../tests/RTree//data.rtree");
   status = remove("../tests/RTree//index.rtree");
 
-  uint Mleaf = 4;
-  uint Mintern = 4;
+  uint Mleaf = 50;
+  uint Mintern = 110;
   std::string path = "../tests/RTree/";
 
   RTree rtree(path, Mleaf, Mintern);
 
   BigRTree bigRTree(rtree);
-  bigRTree.loadFile("../tests/RTree/test.csv");
+  bigRTree.loadFile("../tests/RTree/test.csv", "Pickup_longitude",
+                    "Pickup_latitude");
+  rtree.printTree();
+  rtree.writeToFile();*/
+
+  std::string path = "../tests/RTree/";
+  RTree rtree(path);
+  rtree.printTree();
+
+  /*  std::vector<Trip> trips =
+        rtree.rangeSearch(Point(-73.98574, 40.69963),
+    Point(-73.90955, 40.7604));
+
+    std::cout << "Query: " << trips.size() << "\n";
+
+    std::cout << "\n";
+
+    std::fstream f;
+    std::string path2 = "../tests/RTree/test.csv";
+    f.open(path2, std::ios::in);
+
+    for (Trip trip : trips) {
+      f.seekg(trip.getTripInit(), std::ios::beg);
+      uint tam = trip.getTripOffset() - trip.getTripInit() - 1;
+      char* buffer = new char[tam + 1];
+      f.read(buffer, tam);
+      buffer[tam] = '\0';
+      std::string row = buffer;
+      delete buffer;
+      std::cout << row << "\n";
+      std::cout << "First: " << row[0] << "\n";
+    }
+    f.close();
+  */
 
   /*
   Trip trip(1, 1, "path1", 11, 12);

@@ -12,7 +12,7 @@ class NodeLeaf : public NodeBase {
       : index(index), data(data), nodeID(nodeID) {
     if (isNew) {
       // New nodeLeaf
-      std::cout << "New nodeLeaf\n";
+      // std::cout << "New nodeLeaf\n";
       this->nodeLeafBucket.M = M;
       this->nodeLeafBucket.m = M / 2;
       // this->nodeLeafBucket.mbr = MBR(MBRNULL);
@@ -20,7 +20,7 @@ class NodeLeaf : public NodeBase {
       this->download(isNew);
     } else {
       // Load existing nodeLeaf
-      std::cout << "Load nodeLeaf\n";
+      // std::cout << "Load nodeLeaf\n";
       this->load();
     }
   }
@@ -38,10 +38,9 @@ class NodeLeaf : public NodeBase {
       this->nodeLeafBucket.mbr *= trip;
     }*/
   }
-  void readToFile() override {}
 
   void writeToFile() override {
-    std::cout << "Writing NodeLeaf to file\n";
+    // std::cout << "Writing NodeLeaf to file\n";
     this->download(false);
   }
 

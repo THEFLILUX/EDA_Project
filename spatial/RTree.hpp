@@ -22,6 +22,7 @@ class RootBucket {
   uint rootNumber;
   bool isRootANodeLeaf;
   uint nextNodeNumber;
+  uint numberTrips;
 
   RootBucket() {}
   void print() {
@@ -32,6 +33,7 @@ class RootBucket {
     std::cout << "rootNumber: " << rootNumber << "\n";
     std::cout << "isRootANodeLeaf: " << isRootANodeLeaf << "\n";
     std::cout << "nextNodeNumber: " << nextNodeNumber << "\n";
+    std::cout << "numberTrips: " << numberTrips << "\n";
   }
 };
 
@@ -67,6 +69,7 @@ class RTree {
       this->rootBucket.rootNumber = 1;
       this->rootBucket.isRootANodeLeaf = true;
       this->rootBucket.nextNodeNumber = 2;
+      this->rootBucket.numberTrips = 0;
 
       this->download();
 
@@ -79,7 +82,7 @@ class RTree {
       nodePtr = nullptr;
     } else {
       // Load existing RTree
-      std::cout << "Load RTree\n";
+      // std::cout << "Load RTree\n";
       this->load();
     }
     this->close();
@@ -99,13 +102,8 @@ class RTree {
     fdata.close();
   }
   void writeToFile() {
-    std::cout << "Writing rtree to file\n";
+    // std::cout << "Writing rtree to file\n";
     this->download();
-
-    // temporal
-    this->close();
-    this->nodePtr->writeToFile();
-    this->open();
   }
 
   void insertTrip(Trip trip) {
@@ -113,7 +111,7 @@ class RTree {
       this->nodePtr->insertTrip(trip);
       if (this->nodePtr->getSize() == this->rootBucket.Mleaf + 1) {
         // Split root
-        std::cout << "NodeLeaf root split required\n";
+        // std::cout << "NodeLeaf root split required\n";
         this->close();
         NodeBase* newNodeLeaf = new NodeLeaf(
             this->rootPath + this->indexName, this->rootPath + this->dataName,
@@ -136,18 +134,15 @@ class RTree {
 
         // Regresar a memoria secundaria
         this->close();
-        this->nodePtr->writeToFile();
         newNodeLeaf->writeToFile();
         newNodeIntern->writeToFile();
-        delete this->nodePtr;
         delete newNodeLeaf;
         delete newNodeIntern;
-        // Cargo el root
-        this->nodePtr = new NodeIntern(
-            this->rootPath + this->indexName, this->rootPath + this->dataName,
-            this->rootBucket.rootNumber, this->rootBucket.Mintern);
         this->open();
-        std::cout << "NodeLeaf root finish split\n";
+
+        // Cargo el root
+        this->loadNodeInNodePtr(this->rootBucket.rootNumber);
+        // std::cout << "NodeLeaf root finish split\n";
       }
     } else {
       MBR mbr1(MBRNULL), mbr2(MBRNULL);
@@ -173,9 +168,10 @@ class RTree {
         this->open();
       }
     }
+    this->rootBucket.numberTrips++;
   }
 
-  void printTree() {
+  void printTree(bool printAll = false) {
     std::cout << "\n";
     std::cout << "rootPath: " << rootPath << "\n";
     std::cout << "indexName: " << indexName << "\n";
@@ -186,10 +182,15 @@ class RTree {
       nodePtr->printNode();
     } else {
       // recursive print
-      this->printRec(this->rootBucket.rootNumber);
+      if (printAll) this->printRec(this->rootBucket.rootNumber);
     }
   }
-  void rangeSearch(Point ini, Point fin) {}
+  std::vector<Trip> rangeSearch(Point ini, Point fin) {
+    std::vector<Trip> result;
+    MBR mbr(ini, fin);
+    rangeSearchRec(result, mbr, this->rootBucket.rootNumber);
+    return result;
+  }
 
  private:
   NodeBase* nodePtr;
@@ -225,6 +226,7 @@ class RTree {
   }
   void loadNodeInNodePtr(uint nodeNumber) {
     if (this->nodePtr->getNodeID() == nodeNumber) return;
+
     findex.seekg((nodeNumber - 1) * sizeof(IndexBucket), std::ios::beg);
     read(findex, this->indexBucket);
     this->close();
@@ -248,6 +250,7 @@ class RTree {
   void splitNodeIntern(NodeBase*& firstNode, NodeBase*& secondNode, MBR& mbr1,
                        MBR& mbr2);
   void printRec(uint nodeNumber);
+  void rangeSearchRec(std::vector<Trip>& result, MBR& mbr, uint nodeNumber);
 };
 
 void RTree::insertTripRec(uint nodeNumber, Trip trip, MBR& mbr1, MBR& mbr2) {
@@ -258,15 +261,17 @@ void RTree::insertTripRec(uint nodeNumber, Trip trip, MBR& mbr1, MBR& mbr2) {
     // Nodo Hoja
     this->nodePtr->insertTrip(trip);
     if (this->nodePtr->getSize() == this->rootBucket.Mleaf + 1) {
-      std::cout << "NodeLeaf split required\n";
+      // std::cout << "NodeLeaf split required\n";
+
       this->close();
       NodeBase* newNodeLeaf = new NodeLeaf(
           this->rootPath + this->indexName, this->rootPath + this->dataName,
           this->rootBucket.nextNodeNumber++, this->rootBucket.Mleaf, true);
       this->open();
+
       MBR mbr1Tmp(MBRNULL), mbr2Tmp(MBRNULL);
       this->splitNodeLeaf(this->nodePtr, newNodeLeaf, mbr1Tmp, mbr2Tmp);
-      std::cout << "Fin leaf node split\n";
+      // std::cout << "Fin leaf node split\n";
 
       // Regresar a memoria secundaria nuevo nodo
       this->close();
@@ -294,7 +299,7 @@ void RTree::insertTripRec(uint nodeNumber, Trip trip, MBR& mbr1, MBR& mbr2) {
                                    this->rootBucket.nextNodeNumber - 1);
           if (this->nodePtr->getSize() == this->rootBucket.Mintern + 1) {
             // Split intern node
-            std::cout << "NodeIntern split required\n";
+            // std::cout << "NodeIntern split required\n";
             this->close();
             NodeBase* newNodeIntern =
                 new NodeIntern(this->rootPath + this->indexName,
@@ -341,7 +346,7 @@ void RTree::insertTripRec(uint nodeNumber, Trip trip, MBR& mbr1, MBR& mbr2) {
       this->nodePtr->insertMBR(mbr2Tmp, this->rootBucket.nextNodeNumber - 1);
       if (this->nodePtr->getSize() == this->rootBucket.Mintern + 1) {
         // Split intern node
-        std::cout << "NodeIntern split required\n";
+        // std::cout << "NodeIntern split required\n";
         this->close();
         NodeBase* newNodeIntern = new NodeIntern(
             this->rootPath + this->indexName, this->rootPath + this->dataName,
@@ -558,6 +563,30 @@ void RTree::printRec(uint nodeNumber) {
     std::vector<uint> children = this->nodePtr->getChildren();
     for (uint number : children) {
       this->printRec(number);
+    }
+  }
+}
+
+void RTree::rangeSearchRec(std::vector<Trip>& result, MBR& mbr,
+                           uint nodeNumber) {
+  // Cargar el node
+  this->loadNodeInNodePtr(nodeNumber);
+
+  if (this->indexBucket.isNodeLeaf) {
+    // Nodo hijo
+    std::vector<Trip> trips = this->nodePtr->getTrips();
+    for (Trip trip : trips) {
+      if (mbr - trip == 0) {
+        result.push_back(trip);
+      }
+    }
+  } else {
+    std::vector<uint> children = this->nodePtr->getChildren();
+    std::vector<MBR> mbrs = this->nodePtr->getMBRs();
+    for (uint i = 0; i < children.size(); i++) {
+      if (mbr - mbrs[i] == 0) {
+        rangeSearchRec(result, mbr, children[i]);
+      }
     }
   }
 }

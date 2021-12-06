@@ -378,7 +378,7 @@ class MBR {
       std::cout << "\nERROR: está calculando distancia entre algún MBR nulo\n";
       return 0.0;
     }
-    Point pivote(mbr1.getIni());
+    /*Point pivote(mbr1.getIni());
     dist_t dist = mbr2 - pivote;
     pivote = mbr1.getFin();
     dist = std::min(dist, mbr2 - pivote);
@@ -394,9 +394,20 @@ class MBR {
     pivote.setParam(mbr2.getIniLon(), mbr2.getFinLat());
     dist = std::min(dist, mbr1 - pivote);
     pivote.setParam(mbr2.getFinLon(), mbr2.getIniLat());
-    dist = std::min(dist, mbr1 - pivote);
+    dist = std::min(dist, mbr1 - pivote);*/
 
-    return dist;
+    double dif1 = 0, dif2 = 0;
+    if (mbr1.getIniLon() > mbr2.getFinLon())
+      dif1 = mbr1.getIniLon() - mbr2.getFinLon();
+    else if (mbr1.getFinLon() < mbr2.getIniLon())
+      dif1 = mbr2.getIniLon() - mbr1.getFinLon();
+
+    if (mbr1.getIniLat() > mbr2.getFinLat())
+      dif2 = mbr1.getIniLat() - mbr2.getFinLat();
+    else if (mbr1.getFinLat() < mbr2.getIniLat())
+      dif2 = mbr2.getIniLat() - mbr1.getFinLat();
+
+    return sqrt(dif1 * dif1 + dif2 * dif2);
   }
 
  private:

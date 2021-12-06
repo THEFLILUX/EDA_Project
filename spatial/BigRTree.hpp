@@ -1,5 +1,7 @@
 #pragma once
 
+#include <sstream>
+
 #include "RTree.hpp"
 #include "csv.hpp"
 
@@ -15,35 +17,51 @@ class BigRTree {
  public:
   BigRTree(RTree& rtree) : rtree(rtree) {}
   ~BigRTree() {}
-  void loadFile(std::string path) {
-    CSVReader reader(path);
-    for (CSVRow& row : reader) {  // Input iterator
+  void loadFile(std::string path, std::string strLon, std::string strLat) {
+    CSVFormat format;
+    format.delimiter(',').no_header();
+    CSVReader reader(path, format);
+    uint colLon = 0;
+    uint colLat = 0;
+    long first = 0;
+    long last = 0;
+
+    for (CSVRow& row : reader) {
+      uint i = 0;
       for (CSVField& field : row) {
-        // By default, get<>() produces a std::string.
-        // A more efficient get<string_view>() is also available, where the
-        // resulting string_view is valid as long as the parent CSVRow is alive
-        std::cout << field.get<>() << "\n";
+        if (field.get<>() == strLon && colLon == 0) colLon = i;
+        if (field.get<>() == strLat && colLat == 0) colLat = i;
+        i++;
+        last += field.get<>().size();
+        last += 1;
       }
+      break;
     }
-    /*
-        std::fstream f;
-        f.open(path);
-        if (f.is_open()) {
-          std::string s;
-          f.seekg(2);
+    last += 1;  // Debido al espacio al final del header
 
-          int tam = 5;
-          char* buffer = new char[tam + 1];
-          f.read(buffer, tam);
-          buffer[tam] = '\0';
-          s = buffer;
-          delete buffer;
-
-          std::cout << s << "-\n";
-
-          f.close();
-        } else
-          std::cout << "Error al abrir " << path << "\n";*/
+    int fila = 1;
+    int rejected = 0;
+    for (CSVRow& row : reader) {
+      first = last;
+      uint i = 0;
+      std::string lon, lat;
+      for (CSVField& field : row) {
+        if (i == colLon) lon = field.get<>();
+        if (i == colLat) lat = field.get<>();
+        i++;
+        last += field.get<>().size();
+        last += 1;
+      }
+      last += 1;
+      if (lon == "0" || lon == "" || lat == "0" || lat == "")
+        rejected += 1;
+      else {
+        Trip trip(std::stod(lon), std::stod(lat), path, first, last);
+        this->rtree.insertTrip(trip);
+      }
+      std::cout << fila++ << "\n";
+    }
+    std::cout << "Rejected: " << rejected << "\n";
   }
   void loadFiles(std::vector<std::string> paths) {}
 

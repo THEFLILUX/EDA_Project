@@ -12,7 +12,7 @@ class NodeIntern : public NodeBase {
       : index(index), data(data), nodeID(nodeID) {
     if (isNew) {
       // New nodeIntern
-      std::cout << "New nodeIntern\n";
+      // std::cout << "New nodeIntern\n";
       this->nodeInternBucket.M = M;
       this->nodeInternBucket.m = M / 2;
       // this->nodeInternBucket.mbr = MBR(MBRNULL);
@@ -20,7 +20,7 @@ class NodeIntern : public NodeBase {
       this->download(isNew);
     } else {
       // Load existing nodeIntern
-      std::cout << "Load nodeIntern\n";
+      // std::cout << "Load nodeIntern\n";
       this->load();
     }
   }
@@ -46,9 +46,8 @@ class NodeIntern : public NodeBase {
     }*/
   }
 
-  void readToFile() override {}
   void writeToFile() override {
-    std::cout << "Writing NodeIntern to file\n";
+    // std::cout << "Writing NodeIntern to file\n";
     this->download(false);
   }
 
