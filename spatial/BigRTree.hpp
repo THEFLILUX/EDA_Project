@@ -1,5 +1,7 @@
 #pragma once
 
+#include <unistd.h>
+
 #include <sstream>
 
 #include "RTree.hpp"
@@ -60,6 +62,7 @@ class BigRTree {
         this->rtree.insertTrip(trip);
       }
       std::cout << fila++ << "\n";
+      // if (fila % 100000 == 0) sleep(10);
     }
     std::cout << "Rejected: " << rejected << "\n";
   }

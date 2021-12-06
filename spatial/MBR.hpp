@@ -33,10 +33,10 @@ class MBR {
   void setFin(dist_t lon, dist_t lat) { this->fin = Point(lon, lat); }
   Point getIni() { return this->ini; }
   Point getFin() { return this->fin; }
-  dist_t getIniLon() { this->ini.getLon(); }
-  dist_t getIniLat() { this->ini.getLat(); }
-  dist_t getFinLon() { this->fin.getLon(); }
-  dist_t getFinLat() { this->fin.getLat(); }
+  dist_t getIniLon() { return this->ini.getLon(); }
+  dist_t getIniLat() { return this->ini.getLat(); }
+  dist_t getFinLon() { return this->fin.getLon(); }
+  dist_t getFinLat() { return this->fin.getLat(); }
   double area() {
     return (this->fin.getLon() - this->ini.getLon()) *
            (this->fin.getLat() - this->ini.getLat());
