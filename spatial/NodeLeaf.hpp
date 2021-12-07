@@ -15,7 +15,6 @@ class NodeLeaf : public NodeBase {
       // std::cout << "New nodeLeaf\n";
       this->nodeLeafBucket.M = M;
       this->nodeLeafBucket.m = M / 2;
-      // this->nodeLeafBucket.mbr = MBR(MBRNULL);
       this->nodeLeafBucket.vectorsSize = 0;
       this->download(isNew);
     } else {
@@ -26,7 +25,6 @@ class NodeLeaf : public NodeBase {
   }
 
   uint getSize() override { return this->trips.size(); }
-  // MBR getMBR() override { return this->nodeLeafBucket.mbr; }
   std::vector<Trip>& getTrips() override { return this->trips; }
   uint getNodeID() override { return this->nodeID; }
 

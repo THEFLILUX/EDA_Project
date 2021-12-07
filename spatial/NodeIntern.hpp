@@ -15,7 +15,6 @@ class NodeIntern : public NodeBase {
       // std::cout << "New nodeIntern\n";
       this->nodeInternBucket.M = M;
       this->nodeInternBucket.m = M / 2;
-      // this->nodeInternBucket.mbr = MBR(MBRNULL);
       this->nodeInternBucket.vectorsSize = 0;
       this->download(isNew);
     } else {
@@ -26,7 +25,6 @@ class NodeIntern : public NodeBase {
   }
 
   uint getSize() override { return this->MBRs.size(); }
-  // MBR getMBR() override { return this->nodeInternBucket.mbr; }
   uint getNodeID() override { return this->nodeID; }
   std::vector<MBR>& getMBRs() override { return this->MBRs; }
   std::vector<uint>& getChildren() override { return this->children; }

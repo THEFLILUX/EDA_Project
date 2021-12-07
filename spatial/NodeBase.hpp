@@ -61,7 +61,6 @@ class NodeBucket {
  public:
   uint M;
   uint m;
-  // MBR mbr;
   uint vectorsSize;
 
   NodeBucket() {}
@@ -69,7 +68,6 @@ class NodeBucket {
     std::cout << "\tPrint bucket:\n";
     std::cout << "\tM: " << this->M << "\n";
     std::cout << "\tm: " << this->m << "\n";
-    // std::cout << "\tMBR: " << this->mbr << "\n";
     std::cout << "\tvectorsSize: " << this->vectorsSize << "\n";
   }
 };
