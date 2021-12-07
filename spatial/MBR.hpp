@@ -31,8 +31,8 @@ class MBR {
   void setIni(dist_t lon, dist_t lat) { this->ini = Point(lon, lat); }
   void setFin(Point fin) { this->fin = fin; }
   void setFin(dist_t lon, dist_t lat) { this->fin = Point(lon, lat); }
-  Point getIni() { return this->ini; }
-  Point getFin() { return this->fin; }
+  Point& getIni() { return this->ini; }
+  Point& getFin() { return this->fin; }
   dist_t getIniLon() { return this->ini.getLon(); }
   dist_t getIniLat() { return this->ini.getLat(); }
   dist_t getFinLon() { return this->fin.getLon(); }
@@ -54,7 +54,7 @@ class MBR {
   /*
   Operador *=: Expande el mismo mbr dado un punto o trip
   */
-  MBR& operator*=(Trip trip) {
+  MBR& operator*=(Trip& trip) {
     if (this->isNull()) {
       this->ini = trip.getPoint();
       this->fin = trip.getPoint();
@@ -63,7 +63,7 @@ class MBR {
     (*this) *= trip.getPoint();
     return *this;
   }
-  MBR& operator*=(Point point) {
+  MBR& operator*=(Point& point) {
     if (this->isNull()) {
       this->ini = point;
       this->fin = point;
@@ -101,7 +101,7 @@ class MBR {
   /*
   Operador *: Expande el mbr dado un punto o trip y devuelve otro
   */
-  MBR operator*(Trip trip) {
+  MBR operator*(Trip& trip) {
     MBR newMBR(*this);
     if (this->isNull()) {
       std::cout << "\nERROR: está multiplicando un MBR nulo\n";
@@ -111,7 +111,7 @@ class MBR {
     newMBR = (*this) * trip.getPoint();
     return newMBR;
   }
-  MBR operator*(Point point) {
+  MBR operator*(Point& point) {
     MBR newMBR(*this);
     if (this->isNull()) {
       std::cout << "\nERROR: está multiplicando un MBR nulo\n";
@@ -150,7 +150,7 @@ class MBR {
   /*
   Operador -: Calcula la mínima distancia de un mbr a un trip o punto
   */
-  friend dist_t operator-(MBR mbr, Trip trip) {
+  friend dist_t operator-(MBR& mbr, Trip& trip) {
     if (mbr.isNull()) {
       std::cout << "\nERROR: está calculando distancia a un MBR nulo\n";
       exit(1);
@@ -158,7 +158,7 @@ class MBR {
     }
     return mbr - trip.getPoint();
   }
-  friend dist_t operator-(MBR mbr, Point point) {
+  friend dist_t operator-(MBR& mbr, Point& point) {
     if (mbr.isNull()) {
       std::cout << "\nERROR: está calculando distancia a un MBR nulo\n";
       exit(1);
@@ -190,7 +190,7 @@ class MBR {
   /*
   Operador /: Calcula el incremento del mbr expandido por un trip o punto.
   */
-  friend dist_t operator/(MBR mbr, Trip trip) {
+  friend dist_t operator/(MBR& mbr, Trip& trip) {
     if (mbr.isNull()) {
       std::cout << "\nERROR: está calculando incremento1 de un MBR nulo\n";
       exit(1);
@@ -198,7 +198,7 @@ class MBR {
     }
     return mbr / trip.getPoint();
   }
-  friend dist_t operator/(MBR mbr, Point point) {
+  friend dist_t operator/(MBR& mbr, Point& point) {
     if (mbr.isNull()) {
       std::cout << "\nERROR: está calculando incremento2 de un MBR nulo\n";
       exit(1);
@@ -245,7 +245,7 @@ class MBR {
   /*
   Operador *= (MBR)): Expande el mbr actual dado otro mbr
   */
-  MBR& operator*=(MBR mbr) {
+  MBR& operator*=(MBR& mbr) {
     if (mbr.isNull()) {
       this->ini = mbr.getIni();
       this->fin = mbr.getIni();
@@ -266,7 +266,7 @@ class MBR {
   /*
   Operador - MBR: Calcula la mínima distancia entre MBRs
   */
-  friend dist_t operator-(MBR mbr1, MBR mbr2) {
+  friend dist_t operator-(MBR& mbr1, MBR& mbr2) {
     if (mbr1.isNull() || mbr2.isNull()) {
       std::cout << "\nERROR: está calculando distancia entre algún MBR nulo\n";
       exit(1);

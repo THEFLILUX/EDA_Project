@@ -46,7 +46,7 @@ class Trip {
   std::string getPath() { return this->path; }
   uint getTripInit() { return this->tripIni; }
   uint getTripOffset() { return this->tripOffset; }
-  Point getPoint() { return this->point; }
+  Point& getPoint() { return this->point; }
   dist_t getLon() { return this->point.getLon(); }
   dist_t getLat() { return this->point.getLat(); }
   void setParam(dist_t lon, dist_t lat, std::string path, uint tripIni,
