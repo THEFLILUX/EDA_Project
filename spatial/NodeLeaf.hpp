@@ -27,7 +27,7 @@ class NodeLeaf : public NodeBase {
 
   uint getSize() override { return this->trips.size(); }
   // MBR getMBR() override { return this->nodeLeafBucket.mbr; }
-  std::vector<Trip> getTrips() override { return this->trips; }
+  std::vector<Trip>& getTrips() override { return this->trips; }
   uint getNodeID() override { return this->nodeID; }
 
   void insertTrip(Trip trip) override {
@@ -61,8 +61,14 @@ class NodeLeaf : public NodeBase {
     // this->nodeLeafBucket.mbr = MBR(MBRNULL);
   }
   void insertMBR(MBR mbr, uint child) override {}
-  std::vector<MBR> getMBRs() override { return {}; }
-  std::vector<uint> getChildren() override { return {}; }
+  std::vector<MBR>& getMBRs() override {
+    std::vector<MBR> mbrs;
+    return mbrs;
+  }
+  std::vector<uint>& getChildren() override {
+    std::vector<uint> children;
+    return children;
+  }
   void updateMBRbyIndex(uint& index, MBR& newMBR) override {}
   MBR& getMBRbyIndex(uint& i) override {
     MBR mbr;

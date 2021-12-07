@@ -17,7 +17,7 @@ namespace spatial {
  */
 class BigRTree {
  public:
-  BigRTree(RTree& rtree) : rtree(rtree) {}
+  BigRTree(std::string path, RTree*& rtree) : rtree(rtree), path(path) {}
   ~BigRTree() {}
   void loadFile(std::string path, std::string strLon, std::string strLat) {
     CSVFormat format;
@@ -60,14 +60,13 @@ class BigRTree {
         rejected += 1;
       else {
         trip->setParamNotPath(std::stod(lon), std::stod(lat), first, last);
-        this->rtree.insertTrip(*trip);
+        this->rtree->insertTrip(*trip);
       }
       std::cout << fila++ << "\t" << std::stod(lon) << "\t" << std::stod(lat)
                 << "\n";
-      // if (fila % 100000 == 0) sleep(10);
     }
     std::cout << "Rejected: " << rejected << "\n";
-    rtree.writeToFile();
+    rtree->writeToFile();
   }
   void loadFiles(std::vector<std::string> paths, std::string strLon,
                  std::string strLat) {
@@ -77,7 +76,8 @@ class BigRTree {
   }
 
  private:
-  RTree& rtree;
+  RTree*& rtree;
+  std::string path;
 };
 
 }  // namespace spatial

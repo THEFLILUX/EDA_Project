@@ -18,18 +18,22 @@ TEST(FirstTest, BasicTest) {
   uint Mintern = 110;  // 110;
   std::string path = "../tests/RTree/";
 
-  RTree rtree(path, Mleaf, Mintern);
+  RTree* rtree = new RTree(path, Mleaf, Mintern);
   // RTree rtree(path);
 
-  BigRTree bigRTree(rtree);
-  // std::vector<std::string> paths;
-  // paths.push_back("../tests/RTree/test.csv");
-  // paths.push_back("../tests/RTree/test2.csv");
-  // bigRTree.loadFiles(paths, "Pickup_longitude", "Pickup_latitude");
-  bigRTree.loadFile("../tests/RTree/test200k.csv", "Pickup_longitude",
-                    "Pickup_latitude");
-  rtree.printTree();
-  rtree.writeToFile();
+  BigRTree* bigRTree = new BigRTree(path, rtree);
+  // BigRTree bigRTree(rtree);
+  //  std::vector<std::string> paths;
+  //  paths.push_back("../tests/RTree/test.csv");
+  //  paths.push_back("../tests/RTree/test2.csv");
+  //  bigRTree.loadFiles(paths, "Pickup_longitude", "Pickup_latitude");
+  bigRTree->loadFile("../tests/RTree/test200k.csv", "Pickup_longitude",
+                     "Pickup_latitude");
+  rtree->printTree();
+  rtree->writeToFile();
+
+  delete rtree;
+  delete bigRTree;
   // 5 min por millon
   /*std::string path = "../tests/RTree/";
   RTree rtree(path);

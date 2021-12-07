@@ -110,6 +110,7 @@ class RTree {
 
   void insertTrip(Trip& trip) {
     if (this->rootBucket.isRootANodeLeaf) {
+      // this->nodePtr->getTrips().push_back(trip);
       this->nodePtr->insertTrip(trip);
       if (this->nodePtr->getSize() == this->rootBucket.Mleaf + 1) {
         // Split root
@@ -451,6 +452,7 @@ void RTree::insertTripRec(uint nodeNumber, Trip& trip, MBR*& mbr1, MBR*& mbr2) {
 void RTree::splitNodeLeaf(NodeBase*& firstNode, NodeBase*& secondNode,
                           MBR*& mbr1, MBR*& mbr2) {
   std::vector<Trip> trips = firstNode->getTrips();
+  // std::cout << trips[0].getPath
   firstNode->resetVectors();
 
   Trip trip1, trip2;
@@ -538,6 +540,8 @@ void RTree::splitNodeLeaf(NodeBase*& firstNode, NodeBase*& secondNode,
       }
     }
   }
+  trips.clear();
+  inserted.clear();
 }
 // void RTree::splitNodeIntern(NodeBase*& firstNode, NodeBase*& secondNode, MBR&
 // mbr1, MBR& mbr2) {
@@ -636,6 +640,9 @@ void RTree::splitNodeIntern(NodeBase*& firstNode, NodeBase*& secondNode,
       }
     }
   }
+  MBRs.clear();
+  children.clear();
+  inserted.clear();
 }
 void RTree::printRec(uint nodeNumber) {
   // Cargar el node

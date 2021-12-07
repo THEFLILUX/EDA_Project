@@ -42,7 +42,7 @@ class Trip {
     this->tripOffset = o.tripOffset;
     return *this;
   }
-
+  // void setPath(std::string _path) { this->path = _path; }
   std::string getPath() { return this->path; }
   uint getTripInit() { return this->tripIni; }
   uint getTripOffset() { return this->tripOffset; }
@@ -53,6 +53,8 @@ class Trip {
                 uint tripOffset) {
     this->point = Point(lon, lat);
     strncpy(this->path, path.c_str(), path.size());
+    std::cout << this->path << "\n";
+    exit(1);
     this->tripIni = tripIni;
     this->tripOffset = tripOffset;
   }

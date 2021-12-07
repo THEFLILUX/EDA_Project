@@ -28,8 +28,8 @@ class NodeIntern : public NodeBase {
   uint getSize() override { return this->MBRs.size(); }
   // MBR getMBR() override { return this->nodeInternBucket.mbr; }
   uint getNodeID() override { return this->nodeID; }
-  std::vector<MBR> getMBRs() override { return this->MBRs; }
-  std::vector<uint> getChildren() override { return this->children; }
+  std::vector<MBR>& getMBRs() override { return this->MBRs; }
+  std::vector<uint>& getChildren() override { return this->children; }
   MBR& getMBRbyIndex(uint& i) override { return this->MBRs[i]; }
   uint& getChildByIndex(uint& i) override { return this->children[i]; }
   MBR& getFirstMBR() override { return this->MBRs[0]; }
@@ -72,7 +72,10 @@ class NodeIntern : public NodeBase {
   }
   void insertTrip(Trip trip) override { /* Nothing */
   }
-  std::vector<Trip> getTrips() override { return {}; }
+  std::vector<Trip>& getTrips() override {
+    std::vector<Trip> trips;
+    return trips;
+  }
 
  private:
   uint nodeID;
