@@ -629,6 +629,7 @@ void RTree::rangeSearchRec(std::vector<Trip>& result, MBR& mbr,
     for (uint i = 0; i < this->nodePtr->getSize(); i++) {
       if (mbr - this->nodePtr->getMBRs()[i] == 0) {
         rangeSearchRec(result, mbr, this->nodePtr->getChildren()[i]);
+        this->loadNodeInNodePtr(nodeNumber);
       }
     }
   }
