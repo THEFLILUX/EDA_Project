@@ -30,24 +30,6 @@ class NodeIntern : public NodeBase {
   uint getNodeID() override { return this->nodeID; }
   std::vector<MBR>& getMBRs() override { return this->MBRs; }
   std::vector<uint>& getChildren() override { return this->children; }
-  MBR& getMBRbyIndex(uint& i) override { return this->MBRs[i]; }
-  uint& getChildByIndex(uint& i) override { return this->children[i]; }
-  MBR& getFirstMBR() override { return this->MBRs[0]; }
-
-  void updateMBRbyIndex(uint& index, MBR& newMBR) override {
-    this->MBRs[index] = newMBR;
-  }
-  void insertMBR(MBR mbr, uint child) override {
-    this->MBRs.push_back(mbr);
-    this->children.push_back(child);
-    /*if (this->MBRs.size() == 0)
-      this->nodeInternBucket.mbr = mbr;
-    else {
-      // Unir MBRs
-      this->nodeInternBucket.mbr *= mbr.getIni();
-      this->nodeInternBucket.mbr *= mbr.getFin();
-    }*/
-  }
 
   void writeToFile() override {
     // std::cout << "Writing NodeIntern to file\n";
@@ -65,13 +47,7 @@ class NodeIntern : public NodeBase {
                 << MBRs[i].getFinLat() << ") Child: " << children[i] << "\n";
     }
   }
-  void resetVectors() override {
-    this->MBRs.clear();
-    this->children.clear();
-    // this->nodeInternBucket.mbr = MBR(MBRNULL);
-  }
-  void insertTrip(Trip trip) override { /* Nothing */
-  }
+
   std::vector<Trip>& getTrips() override {
     std::vector<Trip> trips;
     return trips;

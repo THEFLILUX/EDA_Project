@@ -14,23 +14,15 @@ namespace spatial {
 class NodeBase {
  public:
   virtual void printNode() = 0;
-  virtual void insertTrip(Trip trip) = 0;
 
   virtual void writeToFile() = 0;
 
   virtual uint getSize() = 0;
-  // virtual MBR getMBR() = 0;
-  virtual void insertMBR(MBR mbr, uint child) = 0;
-  virtual void resetVectors() = 0;
   virtual uint getNodeID() = 0;
 
   virtual std::vector<Trip>& getTrips() = 0;
   virtual std::vector<MBR>& getMBRs() = 0;
   virtual std::vector<uint>& getChildren() = 0;
-  virtual void updateMBRbyIndex(uint& index, MBR& newMBR) = 0;
-  virtual MBR& getMBRbyIndex(uint& i) = 0;
-  virtual MBR& getFirstMBR() = 0;
-  virtual uint& getChildByIndex(uint& i) = 0;
 
  private:
   virtual void load() = 0;
