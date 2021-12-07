@@ -21,6 +21,19 @@ class Trip {
     }
     this->path[PATH_LENGTH] = '\0';
   }
+  Trip(std::string path) {
+    for (int i = 0; i < PATH_LENGTH; i++) {
+      if (i < path.size())
+        this->path[i] = path[i];
+      else
+        this->path[i] = '.';
+    }
+    this->path[PATH_LENGTH] = '\0';
+    this->point.setLon(0);
+    this->point.setLat(0);
+    this->tripIni = 0;
+    this->tripOffset = 0;
+  }
   Trip& operator=(const Trip& o) {
     this->point = o.point;
     for (int i = 0; i < PATH_LENGTH; i++) this->path[i] = o.path[i];
@@ -40,6 +53,12 @@ class Trip {
                 uint tripOffset) {
     this->point = Point(lon, lat);
     strncpy(this->path, path.c_str(), path.size());
+    this->tripIni = tripIni;
+    this->tripOffset = tripOffset;
+  }
+  void setParamNotPath(dist_t lon, dist_t lat, uint tripIni, uint tripOffset) {
+    this->point.setLon(lon);
+    this->point.setLat(lat);
     this->tripIni = tripIni;
     this->tripOffset = tripOffset;
   }

@@ -108,7 +108,7 @@ class RTree {
     this->download();
   }
 
-  void insertTrip(Trip trip) {
+  void insertTrip(Trip& trip) {
     if (this->rootBucket.isRootANodeLeaf) {
       this->nodePtr->insertTrip(trip);
       if (this->nodePtr->getSize() == this->rootBucket.Mleaf + 1) {
@@ -166,8 +166,11 @@ class RTree {
         // Regresar a memoria secundaria
         this->close();
         newNodeInternRoot->writeToFile();
+        delete newNodeInternRoot;
         this->nodePtr->writeToFile();
         this->open();
+
+        this->loadNodeInNodePtr(this->rootBucket.rootNumber);
       }
     }
     this->rootBucket.numberTrips++;
@@ -246,7 +249,7 @@ class RTree {
     this->open();
   }
 
-  void insertTripRec(uint nodeNumber, Trip trip, MBR& mbr1, MBR& mbr2);
+  void insertTripRec(uint nodeNumber, Trip& trip, MBR& mbr1, MBR& mbr2);
   void splitNodeLeaf(NodeBase*& firstNode, NodeBase*& secondNode, MBR& mbr1,
                      MBR& mbr2);
   void splitNodeIntern(NodeBase*& firstNode, NodeBase*& secondNode, MBR& mbr1,
@@ -255,7 +258,7 @@ class RTree {
   void rangeSearchRec(std::vector<Trip>& result, MBR& mbr, uint nodeNumber);
 };
 
-void RTree::insertTripRec(uint nodeNumber, Trip trip, MBR& mbr1, MBR& mbr2) {
+void RTree::insertTripRec(uint nodeNumber, Trip& trip, MBR& mbr1, MBR& mbr2) {
   // Cargar el node
   this->loadNodeInNodePtr(nodeNumber);
 
@@ -279,6 +282,7 @@ void RTree::insertTripRec(uint nodeNumber, Trip trip, MBR& mbr1, MBR& mbr2) {
       this->close();
       newNodeLeaf->writeToFile();
       this->nodePtr->writeToFile();
+      delete newNodeLeaf;
       this->open();
 
       mbr1 = mbr1Tmp;
@@ -286,12 +290,23 @@ void RTree::insertTripRec(uint nodeNumber, Trip trip, MBR& mbr1, MBR& mbr2) {
     }
   } else {
     // Nodo intern
-    std::vector<MBR> MBRs = this->nodePtr->getMBRs();
+    /*std::vector<MBR> MBRs = this->nodePtr->getMBRs();
     std::vector<uint> children = this->nodePtr->getChildren();
     for (uint i = 0; i < MBRs.size(); i++) {
       if (MBRs[i] - trip == 0) {
         MBR mbr1Tmp(MBRs[i]), mbr2Tmp(MBRs[i]);
-        this->insertTripRec(children[i], trip, mbr1Tmp, mbr2Tmp);
+
+        uint child = children[i];
+        MBRs.clear();
+        children.clear();*/
+    for (uint i = 0; i < this->nodePtr->getSize(); i++) {
+      if (this->nodePtr->getMBRbyIndex(i) - trip == 0) {
+        MBR mbr1Tmp(this->nodePtr->getMBRbyIndex(i)),
+            mbr2Tmp(this->nodePtr->getMBRbyIndex(i));
+
+        this->insertTripRec(this->nodePtr->getChildByIndex(i), trip, mbr1Tmp,
+                            mbr2Tmp);
+
         if (mbr1Tmp != mbr2Tmp) {
           // Hubo un split
           this->loadNodeInNodePtr(nodeNumber);
@@ -299,6 +314,7 @@ void RTree::insertTripRec(uint nodeNumber, Trip trip, MBR& mbr1, MBR& mbr2) {
           this->nodePtr->updateMBRbyIndex(i, mbr1Tmp);
           this->nodePtr->insertMBR(mbr2Tmp,
                                    this->rootBucket.nextNodeNumber - 1);
+
           if (this->nodePtr->getSize() == this->rootBucket.Mintern + 1) {
             // Split intern node
             // std::cout << "NodeIntern split required\n";
@@ -319,6 +335,7 @@ void RTree::insertTripRec(uint nodeNumber, Trip trip, MBR& mbr1, MBR& mbr2) {
             this->close();
             newNodeIntern->writeToFile();
             this->nodePtr->writeToFile();
+            delete newNodeIntern;
             this->open();
           }
         }
@@ -327,19 +344,30 @@ void RTree::insertTripRec(uint nodeNumber, Trip trip, MBR& mbr1, MBR& mbr2) {
     }
     // No entró en ningún MBR
     // escoger el MBR que se expanda menos
-    double minExpansion = MBRs[0] / trip;
+    // double minExpansion = MBRs[0] / trip;
+    double minExpansion = this->nodePtr->getFirstMBR() / trip;
     uint ind = 0;
-    for (uint i = 1; i < MBRs.size(); i++) {
-      double locExpansion = MBRs[i] / trip;
+    for (uint i = 1; i < this->nodePtr->getSize(); i++) {
+      // double locExpansion = MBRs[i] / trip;
+      double locExpansion = this->nodePtr->getMBRbyIndex(i) / trip;
       if (locExpansion < minExpansion) {
         minExpansion = locExpansion;
         ind = i;
       }
     }
-    MBR newMBR = MBRs[ind] * trip;
+    // MBR newMBR = MBRs[ind] * trip;
+    MBR newMBR = this->nodePtr->getMBRbyIndex(ind) * trip;
     this->nodePtr->updateMBRbyIndex(ind, newMBR);
     MBR mbr1Tmp(newMBR), mbr2Tmp(newMBR);
-    this->insertTripRec(children[ind], trip, mbr1Tmp, mbr2Tmp);
+
+    /*uint child = children[ind];
+    MBRs.clear();
+    children.clear();*/
+
+    this->insertTripRec(this->nodePtr->getChildByIndex(ind), trip, mbr1Tmp,
+                        mbr2Tmp);
+    // this->insertTripRec(child, trip, mbr1Tmp, mbr2Tmp);
+
     if (mbr1Tmp != mbr2Tmp) {
       // Hubo un split
       this->loadNodeInNodePtr(nodeNumber);
@@ -362,6 +390,7 @@ void RTree::insertTripRec(uint nodeNumber, Trip trip, MBR& mbr1, MBR& mbr2) {
         // Regresar a memoria secundaria nuevo nodo
         this->close();
         newNodeIntern->writeToFile();
+        delete newNodeIntern;
         this->nodePtr->writeToFile();
         this->open();
       }
@@ -468,9 +497,16 @@ void RTree::splitNodeIntern(NodeBase*& firstNode, NodeBase*& secondNode,
   MBR mbrTmp1(MBRNULL), mbrTmp2(MBRNULL);
   uint ind1, ind2;
   dist_t maxMBRDistance = 0;
+  /*std::cout << MBRs.size() << "\n";
+  for (MBR mbr : MBRs) {
+    std::cout << mbr.getIniLon() << " - " << mbr.getIniLat() << " - "
+              << mbr.getFinLon() << " - " << mbr.getFinLat() << "\n";
+  }*/
   for (uint i = 0; i < MBRs.size(); i++) {
     for (uint j = i + 1; j < MBRs.size(); j++) {
       dist_t localDistance = MBRs[i] - MBRs[j];
+      // std::cout << "i: " << i << " j: " << j << " lcl: " << localDistance<<
+      // "\n";
       if (localDistance > maxMBRDistance) {
         mbrTmp1 = MBRs[i];
         mbrTmp2 = MBRs[j];
@@ -481,6 +517,12 @@ void RTree::splitNodeIntern(NodeBase*& firstNode, NodeBase*& secondNode,
     }
   }
   ///*///*////
+  /*std::cout << "Tmp1: " << mbrTmp1.getIniLon() << " - " << mbrTmp1.getIniLat()
+            << " - " << mbrTmp1.getFinLon() << " - " << mbrTmp1.getFinLat()
+            << "\n";
+  std::cout << "Tmp2: " << mbrTmp2.getIniLon() << " - " << mbrTmp2.getIniLat()
+            << " - " << mbrTmp2.getFinLon() << " - " << mbrTmp2.getFinLat()
+            << "\n";*/
   if (mbrTmp1.getIniLon() < mbrTmp2.getIniLon() ||
       (mbrTmp1.getIniLon() == mbrTmp2.getIniLon() &&
        mbrTmp1.getIniLat() < mbrTmp2.getIniLat())) {

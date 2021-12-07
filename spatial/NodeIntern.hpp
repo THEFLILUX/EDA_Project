@@ -30,8 +30,11 @@ class NodeIntern : public NodeBase {
   uint getNodeID() override { return this->nodeID; }
   std::vector<MBR> getMBRs() override { return this->MBRs; }
   std::vector<uint> getChildren() override { return this->children; }
+  MBR& getMBRbyIndex(uint& i) override { return this->MBRs[i]; }
+  uint& getChildByIndex(uint& i) override { return this->children[i]; }
+  MBR& getFirstMBR() override { return this->MBRs[0]; }
 
-  void updateMBRbyIndex(uint index, MBR newMBR) override {
+  void updateMBRbyIndex(uint& index, MBR& newMBR) override {
     this->MBRs[index] = newMBR;
   }
   void insertMBR(MBR mbr, uint child) override {

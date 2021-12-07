@@ -63,7 +63,19 @@ class NodeLeaf : public NodeBase {
   void insertMBR(MBR mbr, uint child) override {}
   std::vector<MBR> getMBRs() override { return {}; }
   std::vector<uint> getChildren() override { return {}; }
-  void updateMBRbyIndex(uint index, MBR newMBR) override {}
+  void updateMBRbyIndex(uint& index, MBR& newMBR) override {}
+  MBR& getMBRbyIndex(uint& i) override {
+    MBR mbr;
+    return mbr;
+  }
+  uint& getChildByIndex(uint& i) override {
+    uint child;
+    return child;
+  }
+  MBR& getFirstMBR() override {
+    MBR mbr;
+    return mbr;
+  }
 
  private:
   uint nodeID;

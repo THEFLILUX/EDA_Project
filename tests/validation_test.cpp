@@ -14,19 +14,23 @@ TEST(FirstTest, BasicTest) {
   int status = remove("../tests/RTree//data.rtree");
   status = remove("../tests/RTree//index.rtree");
 
-  uint Mleaf = 50;
-  uint Mintern = 110;
+  uint Mleaf = 50;     // 50;
+  uint Mintern = 110;  // 110;
   std::string path = "../tests/RTree/";
 
   RTree rtree(path, Mleaf, Mintern);
   // RTree rtree(path);
 
   BigRTree bigRTree(rtree);
+  // std::vector<std::string> paths;
+  // paths.push_back("../tests/RTree/test.csv");
+  // paths.push_back("../tests/RTree/test2.csv");
+  // bigRTree.loadFiles(paths, "Pickup_longitude", "Pickup_latitude");
   bigRTree.loadFile("../tests/RTree/test.csv", "Pickup_longitude",
                     "Pickup_latitude");
   rtree.printTree();
   rtree.writeToFile();
-  /*
+  /*5 min por millon
     std::string path = "../tests/RTree/";
     RTree rtree(path);
     rtree.printTree();
@@ -56,54 +60,57 @@ TEST(FirstTest, BasicTest) {
 
     std::cout << "Fin test\n";*/
   /*
-  Trip trip(1, 1, "path1", 11, 12);
-  rtree.insertTrip(trip);
-  trip.setParam(2, 2, "path2", 21, 22);
-  rtree.insertTrip(trip);
-  trip.setParam(10, 10, "path3", 31, 32);
-  rtree.insertTrip(trip);
-  trip.setParam(11, 12, "path4", 41, 42);
-  rtree.insertTrip(trip);
+    Trip trip(1, 1, "path1", 11, 12);
+    rtree.insertTrip(trip);
+    trip.setParam(2, 2, "path2", 21, 22);
+    rtree.insertTrip(trip);
+    trip.setParam(10, 10, "path3", 31, 32);
+    rtree.insertTrip(trip);
+    trip.setParam(11, 12, "path4", 41, 42);
+    rtree.insertTrip(trip);
 
-  std::cout << "\n1er print\n";
-  rtree.printTree();
+    std::cout << "\n1er print\n";
+    rtree.printTree(true);
 
-  trip.setParam(13, 14, "path5", 51, 52);
-  rtree.insertTrip(trip);
+    trip.setParam(13, 14, "path5", 51, 52);
+    rtree.insertTrip(trip);
 
-  std::cout << "\n2nd print\n";
-  rtree.printTree();
-  trip.setParam(20, 20, "path6", 61, 62);
-  rtree.insertTrip(trip);
+    std::cout << "\n2nd print\n";
+    rtree.printTree(true);
+    trip.setParam(20, 20, "path6", 61, 62);
+    rtree.insertTrip(trip);
 
-  std::cout << "\n3er print\n";
-  rtree.printTree();
-  trip.setParam(8, 9, "path7", 71, 72);
-  rtree.insertTrip(trip);
+    std::cout << "\n3er print\n";
+    rtree.printTree(true);
+    trip.setParam(8, 9, "path7", 71, 72);
+    rtree.insertTrip(trip);
 
-  std::cout << "\n4to print\n";
-  rtree.printTree();
+    std::cout << "\n4to print\n";
+    rtree.printTree(true);
 
-  trip.setParam(15, 15, "path8", 81, 82);
-  rtree.insertTrip(trip);
-  trip.setParam(30, 30, "path9", 91, 92);
-  rtree.insertTrip(trip);
-  trip.setParam(35, 35, "path10", 101, 102);
-  rtree.insertTrip(trip);
+    trip.setParam(15, 15, "path8", 81, 82);
+    rtree.insertTrip(trip);
+    trip.setParam(30, 30, "path9", 91, 92);
+    rtree.insertTrip(trip);
+    trip.setParam(35, 35, "path10", 101, 102);
+    rtree.insertTrip(trip);
 
-  std::cout << "\n5to print\n";
-  rtree.printTree();
+    std::cout << "\n5to print\n";
+    rtree.printTree(true);
 
-  trip.setParam(40, 40, "path11", 111, 112);
-  rtree.insertTrip(trip);
-  trip.setParam(50, 50, "path12", 121, 122);
-  rtree.insertTrip(trip);
-  trip.setParam(41, 41, "path13", 131, 132);
-  rtree.insertTrip(trip);
+    std::cout << "\nPrint1\n";
+    trip.setParam(40, 40, "path11", 111, 112);
+    rtree.insertTrip(trip);
+    std::cout << "\nPrint2\n";
+    trip.setParam(50, 50, "path12", 121, 122);
+    rtree.insertTrip(trip);
+    std::cout << "\nPrint3\n";
+    trip.setParam(41, 41, "path13", 131, 132);
+    rtree.insertTrip(trip);
 
-  std::cout << "\n6to print\n";
-  rtree.printTree();*/
-
+    std::cout << "\n6to print\n";
+    rtree.printTree(true);
+  */
   EXPECT_TRUE(1);
 }
 

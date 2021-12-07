@@ -61,34 +61,6 @@ class MBR {
       return *this;
     }
     (*this) *= trip.getPoint();
-    /*
-    if (trip.getLon() > fin.getLon()) {
-      if (trip.getLat() > fin.getLat()) {
-        this->fin = Point(trip.getLon(), trip.getLat());
-      } else if (trip.getLat() < this->ini.getLat()) {
-        this->ini = Point(this->ini.getLon(), trip.getLat());
-        this->fin = Point(trip.getLon(), this->fin.getLat());
-      } else {
-        this->fin = Point(trip.getLon(), this->fin.getLat());
-      }
-    } else if (trip.getLon() < this->ini.getLon()) {
-      if (trip.getLat() > this->fin.getLat()) {
-        this->ini = Point(trip.getLon(), this->ini.getLat());
-        this->fin = Point(this->fin.getLon(), trip.getLat());
-      } else if (trip.getLat() < this->ini.getLat()) {
-        this->ini = Point(trip.getLon(), trip.getLat());
-      } else {
-        this->ini = Point(trip.getLon(), this->ini.getLat());
-      }
-    } else {
-      if (trip.getLat() > this->fin.getLat()) {
-        this->fin = Point(this->fin.getLon(), trip.getLat());
-      } else if (trip.getLat() < this->ini.getLat()) {
-        this->ini = Point(this->ini.getLon(), trip.getLat());
-      } else {
-        // Está dentro del mbr
-      }
-    }*/
     return *this;
   }
   MBR& operator*=(Point point) {
@@ -133,42 +105,17 @@ class MBR {
     MBR newMBR(*this);
     if (this->isNull()) {
       std::cout << "\nERROR: está multiplicando un MBR nulo\n";
+      exit(1);
       return newMBR;
     }
     newMBR = (*this) * trip.getPoint();
-    /*if (trip.getLon() > this->fin.getLon()) {
-      if (trip.getLat() > this->fin.getLat()) {
-        newMBR.setFin(Point(trip.getLon(), trip.getLat()));
-      } else if (trip.getLat() < this->ini.getLat()) {
-        newMBR.setIni(Point(this->ini.getLon(), trip.getLat()));
-        newMBR.setFin(Point(trip.getLon(), this->fin.getLat()));
-      } else {
-        newMBR.setFin(Point(trip.getLon(), this->fin.getLat()));
-      }
-    } else if (trip.getLon() < this->ini.getLon()) {
-      if (trip.getLat() > this->fin.getLat()) {
-        newMBR.setIni(Point(trip.getLon(), this->ini.getLat()));
-        newMBR.setFin(Point(this->fin.getLon(), trip.getLat()));
-      } else if (trip.getLat() < this->ini.getLat()) {
-        newMBR.setIni(Point(trip.getLon(), trip.getLat()));
-      } else {
-        newMBR.setIni(Point(trip.getLon(), this->ini.getLat()));
-      }
-    } else {
-      if (trip.getLat() > this->fin.getLat()) {
-        newMBR.setFin(Point(this->fin.getLon(), trip.getLat()));
-      } else if (trip.getLat() < this->ini.getLat()) {
-        newMBR.setIni(Point(this->ini.getLon(), trip.getLat()));
-      } else {
-        // Está dentro del mbr
-      }
-    }*/
     return newMBR;
   }
   MBR operator*(Point point) {
     MBR newMBR(*this);
     if (this->isNull()) {
       std::cout << "\nERROR: está multiplicando un MBR nulo\n";
+      exit(1);
       return newMBR;
     }
     if (point.getLon() > this->fin.getLon()) {
@@ -206,36 +153,15 @@ class MBR {
   friend dist_t operator-(MBR mbr, Trip trip) {
     if (mbr.isNull()) {
       std::cout << "\nERROR: está calculando distancia a un MBR nulo\n";
+      exit(1);
       return 0.0;
     }
     return mbr - trip.getPoint();
-    /*
-    if (trip.getLon() > mbr.getFinLon()) {
-      if (trip.getLat() > mbr.getFinLat())
-        return mbr.getFin() - trip;
-      else if (trip.getLat() < mbr.getIniLat())
-        return Point(mbr.getFinLon(), mbr.getIniLat()) - trip;
-      else
-        return trip.getLon() - mbr.getFinLon();
-    } else if (trip.getLon() < mbr.getIniLon()) {
-      if (trip.getLat() > mbr.getFinLat())
-        return Point(mbr.getIniLon(), mbr.getFinLat()) - trip;
-      else if (trip.getLat() < mbr.getIniLat())
-        return mbr.getIni() - trip;
-      else
-        return mbr.getIniLon() - trip.getLon();
-    } else {
-      if (trip.getLat() > mbr.getFinLat())
-        return trip.getLat() - mbr.getFinLat();
-      else if (trip.getLat() < mbr.getIniLat())
-        return mbr.getIniLat() - trip.getLat();
-      else
-        return 0.0;
-    }*/
   }
   friend dist_t operator-(MBR mbr, Point point) {
     if (mbr.isNull()) {
       std::cout << "\nERROR: está calculando distancia a un MBR nulo\n";
+      exit(1);
       return 0.0;
     }
     if (point.getLon() > mbr.getFinLon()) {
@@ -266,51 +192,16 @@ class MBR {
   */
   friend dist_t operator/(MBR mbr, Trip trip) {
     if (mbr.isNull()) {
-      std::cout << "\nERROR: está calculando incremento de un MBR nulo\n";
+      std::cout << "\nERROR: está calculando incremento1 de un MBR nulo\n";
+      exit(1);
       return 0.0;
     }
     return mbr / trip.getPoint();
-    /*
-    MBR newMBR(mbr);
-    if (trip.getLon() > mbr.getFinLon()) {
-      if (trip.getLat() > mbr.getFinLat()) {
-        newMBR.setFin(Point(trip.getLon(), trip.getLat()));
-      } else if (trip.getLat() < mbr.getIniLat()) {
-        newMBR.setIni(Point(mbr.getIniLon(), trip.getLat()));
-        newMBR.setFin(Point(trip.getLon(), mbr.getFinLat()));
-      } else {
-        newMBR.setFin(Point(trip.getLon(), mbr.getFinLat()));
-      }
-    } else if (trip.getLon() < mbr.getIniLon()) {
-      if (trip.getLat() > mbr.getFinLat()) {
-        newMBR.setIni(Point(trip.getLon(), mbr.getIniLat()));
-        newMBR.setFin(Point(mbr.getFinLon(), trip.getLat()));
-      } else if (trip.getLat() < mbr.getIniLat()) {
-        newMBR.setIni(Point(trip.getLon(), trip.getLat()));
-      } else {
-        newMBR.setIni(Point(trip.getLon(), mbr.getIniLat()));
-      }
-    } else {
-      if (trip.getLat() > mbr.getFinLat()) {
-        newMBR.setFin(Point(mbr.getFinLon(), trip.getLat()));
-      } else if (trip.getLat() < mbr.getIniLat()) {
-        newMBR.setIni(Point(mbr.getIniLon(), trip.getLat()));
-      } else {
-        // Está dentro del mbr (Nunca entra acá)
-      }
-    }
-    double areaIncrease = newMBR.area() - mbr.area();
-    if (areaIncrease < 0) {
-      std::cout << "\n\t\tERROR DIFERENCIA AREA NEGATIVA\n";
-      std::cout << "\t" << mbr << "\n";
-      std::cout << "\t" << newMBR << "\n";
-      return -areaIncrease;
-    }
-    return areaIncrease;*/
   }
   friend dist_t operator/(MBR mbr, Point point) {
     if (mbr.isNull()) {
-      std::cout << "\nERROR: está calculando incremento de un MBR nulo\n";
+      std::cout << "\nERROR: está calculando incremento2 de un MBR nulo\n";
+      exit(1);
       return 0.0;
     }
     MBR newMBR(mbr);
@@ -346,6 +237,7 @@ class MBR {
       std::cout << "\n\t\tERROR DIFERENCIA AREA NEGATIVA\n";
       std::cout << "\t" << mbr << "\n";
       std::cout << "\t" << newMBR << "\n";
+      exit(1);
       return -areaIncrease;
     }
     return areaIncrease;
@@ -359,6 +251,7 @@ class MBR {
       this->fin = mbr.getIni();
       std::cout
           << "\nERROR: está calculando incremento a partir de un MBR nulo\n";
+      exit(1);
       return *this;
     }
     if (this->isNull()) {
@@ -376,26 +269,9 @@ class MBR {
   friend dist_t operator-(MBR mbr1, MBR mbr2) {
     if (mbr1.isNull() || mbr2.isNull()) {
       std::cout << "\nERROR: está calculando distancia entre algún MBR nulo\n";
+      exit(1);
       return 0.0;
     }
-    /*Point pivote(mbr1.getIni());
-    dist_t dist = mbr2 - pivote;
-    pivote = mbr1.getFin();
-    dist = std::min(dist, mbr2 - pivote);
-    pivote.setParam(mbr1.getIniLon(), mbr1.getFinLat());
-    dist = std::min(dist, mbr2 - pivote);
-    pivote.setParam(mbr1.getFinLon(), mbr1.getIniLat());
-    dist = std::min(dist, mbr2 - pivote);
-
-    pivote = mbr2.getIni();
-    dist = std::min(dist, mbr1 - pivote);
-    pivote = mbr2.getFin();
-    dist = std::min(dist, mbr1 - pivote);
-    pivote.setParam(mbr2.getIniLon(), mbr2.getFinLat());
-    dist = std::min(dist, mbr1 - pivote);
-    pivote.setParam(mbr2.getFinLon(), mbr2.getIniLat());
-    dist = std::min(dist, mbr1 - pivote);*/
-
     double dif1 = 0, dif2 = 0;
     if (mbr1.getIniLon() > mbr2.getFinLon())
       dif1 = mbr1.getIniLon() - mbr2.getFinLon();

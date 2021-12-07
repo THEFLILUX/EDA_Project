@@ -27,7 +27,10 @@ class NodeBase {
   virtual std::vector<Trip> getTrips() = 0;
   virtual std::vector<MBR> getMBRs() = 0;
   virtual std::vector<uint> getChildren() = 0;
-  virtual void updateMBRbyIndex(uint index, MBR newMBR) = 0;
+  virtual void updateMBRbyIndex(uint& index, MBR& newMBR) = 0;
+  virtual MBR& getMBRbyIndex(uint& i) = 0;
+  virtual MBR& getFirstMBR() = 0;
+  virtual uint& getChildByIndex(uint& i) = 0;
 
  private:
   virtual void load() = 0;
