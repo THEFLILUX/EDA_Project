@@ -620,18 +620,15 @@ void RTree::rangeSearchRec(std::vector<Trip>& result, MBR& mbr,
 
   if (this->indexBucket.isNodeLeaf) {
     // Nodo hijo
-    std::vector<Trip> trips = this->nodePtr->getTrips();
-    for (Trip trip : trips) {
-      if (mbr - trip == 0) {
-        result.push_back(trip);
+    for (uint i = 0; i < this->nodePtr->getSize(); i++) {
+      if (mbr - this->nodePtr->getTrips()[i] == 0) {
+        result.push_back(this->nodePtr->getTrips()[i]);
       }
     }
   } else {
-    std::vector<uint> children = this->nodePtr->getChildren();
-    std::vector<MBR> mbrs = this->nodePtr->getMBRs();
-    for (uint i = 0; i < children.size(); i++) {
-      if (mbr - mbrs[i] == 0) {
-        rangeSearchRec(result, mbr, children[i]);
+    for (uint i = 0; i < this->nodePtr->getSize(); i++) {
+      if (mbr - this->nodePtr->getMBRs()[i] == 0) {
+        rangeSearchRec(result, mbr, this->nodePtr->getChildren()[i]);
       }
     }
   }
