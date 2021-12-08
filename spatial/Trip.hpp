@@ -42,6 +42,7 @@ class Trip {
     this->tripOffset = o.tripOffset;
     return *this;
   }
+
   // void setPath(std::string _path) { this->path = _path; }
   std::string getPath() { return this->path; }
   uint getTripInit() { return this->tripIni; }

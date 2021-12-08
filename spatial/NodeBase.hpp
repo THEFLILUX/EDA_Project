@@ -24,6 +24,8 @@ class NodeBase {
   virtual std::vector<MBR>& getMBRs() = 0;
   virtual std::vector<uint>& getChildren() = 0;
 
+  virtual ~NodeBase() {}
+
  private:
   virtual void load() = 0;
   virtual void download(bool isNew) = 0;

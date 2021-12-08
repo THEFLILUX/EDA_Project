@@ -10,18 +10,24 @@ class NodeIntern : public NodeBase {
   NodeIntern(std::string index, std::string data, uint nodeID, uint M = 0,
              bool isNew = false)
       : index(index), data(data), nodeID(nodeID) {
+    this->nodeInternBucket = new NodeBucket();
     if (isNew) {
       // New nodeIntern
       // std::cout << "New nodeIntern\n";
-      this->nodeInternBucket.M = M;
-      this->nodeInternBucket.m = M / 2;
-      this->nodeInternBucket.vectorsSize = 0;
+      this->nodeInternBucket->M = M;
+      this->nodeInternBucket->m = M / 2;
+      this->nodeInternBucket->vectorsSize = 0;
       this->download(isNew);
     } else {
       // Load existing nodeIntern
       // std::cout << "Load nodeIntern\n";
       this->load();
     }
+  }
+  virtual ~NodeIntern() {
+    this->MBRs.clear();
+    this->children.clear();
+    delete this->nodeInternBucket;
   }
 
   uint getSize() override { return this->MBRs.size(); }
@@ -37,7 +43,7 @@ class NodeIntern : public NodeBase {
   void printNode() override {
     std::cout << "\nPrint Node Intern\n";
     std::cout << "nodeID: " << this->nodeID << "\n";
-    this->nodeInternBucket.print();
+    this->nodeInternBucket->print();
     std::cout << "Size: " << this->MBRs.size() << "\n";
     for (int i = 0; i < this->MBRs.size(); i++) {
       std::cout << "\tMBR " << i << ": (" << MBRs[i].getIniLon() << ", "
@@ -53,7 +59,7 @@ class NodeIntern : public NodeBase {
 
  private:
   uint nodeID;
-  NodeBucket nodeInternBucket;
+  NodeBucket* nodeInternBucket;
   std::vector<MBR> MBRs;
   std::vector<uint> children;
   std::string index;
@@ -73,16 +79,18 @@ class NodeIntern : public NodeBase {
     read(findex, indexBucket);
 
     fdata.seekg(indexBucket.posIni, std::ios::beg);
-    read(fdata, this->nodeInternBucket);
+    read(fdata, *this->nodeInternBucket);
     MBR mbr;
     uint child;
-    for (int i = 0; i < this->nodeInternBucket.vectorsSize; i++) {
+    for (int i = 0; i < this->nodeInternBucket->vectorsSize; i++) {
       read(fdata, mbr);
       read(fdata, child);
       this->MBRs.push_back(mbr);
       this->children.push_back(child);
     }
 
+    findex.flush();
+    fdata.flush();
     findex.close();
     fdata.close();
   }
@@ -106,13 +114,13 @@ class NodeIntern : public NodeBase {
       fdata.seekp(indexBucket.posIni, std::ios::beg);
     }
 
-    this->nodeInternBucket.vectorsSize = this->MBRs.size();
+    this->nodeInternBucket->vectorsSize = this->MBRs.size();
 
-    write(fdata, this->nodeInternBucket);
+    write(fdata, *this->nodeInternBucket);
 
     MBR mbrDump;
     uint childDump;
-    for (int i = 0; i < this->nodeInternBucket.M; i++) {
+    for (int i = 0; i < this->nodeInternBucket->M; i++) {
       if (i < this->MBRs.size()) {
         write(fdata, this->MBRs[i]);
         write(fdata, this->children[i]);
@@ -122,6 +130,8 @@ class NodeIntern : public NodeBase {
       }
     }
 
+    findex.flush();
+    fdata.flush();
     findex.close();
     fdata.close();
   }

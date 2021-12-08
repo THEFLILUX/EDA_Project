@@ -10,18 +10,23 @@ class NodeLeaf : public NodeBase {
   NodeLeaf(std::string index, std::string data, uint nodeID, uint M = 0,
            bool isNew = false)
       : index(index), data(data), nodeID(nodeID) {
+    this->nodeLeafBucket = new NodeBucket();
     if (isNew) {
       // New nodeLeaf
       // std::cout << "New nodeLeaf\n";
-      this->nodeLeafBucket.M = M;
-      this->nodeLeafBucket.m = M / 2;
-      this->nodeLeafBucket.vectorsSize = 0;
+      this->nodeLeafBucket->M = M;
+      this->nodeLeafBucket->m = M / 2;
+      this->nodeLeafBucket->vectorsSize = 0;
       this->download(isNew);
     } else {
       // Load existing nodeLeaf
       // std::cout << "Load nodeLeaf\n";
       this->load();
     }
+  }
+  virtual ~NodeLeaf() {
+    this->trips.clear();
+    delete this->nodeLeafBucket;
   }
 
   uint getSize() override { return this->trips.size(); }
@@ -36,7 +41,7 @@ class NodeLeaf : public NodeBase {
   void printNode() override {
     std::cout << "\nPrint Node Leaf\n";
     std::cout << "nodeID: " << this->nodeID << "\n";
-    this->nodeLeafBucket.print();
+    this->nodeLeafBucket->print();
     for (int i = 0; i < trips.size(); i++) {
       std::cout << "\tTrip " << i << ": (" << trips[i].getLon() << ", "
                 << trips[i].getLat() << ") tripInit: " << trips[i].getTripInit()
@@ -56,7 +61,7 @@ class NodeLeaf : public NodeBase {
 
  private:
   uint nodeID;
-  NodeBucket nodeLeafBucket;
+  NodeBucket* nodeLeafBucket;
   std::vector<Trip> trips;
   std::string index;
   std::string data;
@@ -74,13 +79,15 @@ class NodeLeaf : public NodeBase {
     read(findex, indexBucket);
 
     fdata.seekg(indexBucket.posIni, std::ios::beg);
-    read(fdata, this->nodeLeafBucket);
+    read(fdata, *this->nodeLeafBucket);
     Trip trip;
-    for (int i = 0; i < this->nodeLeafBucket.vectorsSize; i++) {
+    for (int i = 0; i < this->nodeLeafBucket->vectorsSize; i++) {
       read(fdata, trip);
       this->trips.push_back(trip);
     }
 
+    findex.flush();
+    fdata.flush();
     findex.close();
     fdata.close();
   }
@@ -102,18 +109,20 @@ class NodeLeaf : public NodeBase {
       read(findex, indexBucket);
       fdata.seekp(indexBucket.posIni, std::ios::beg);
     }
-    this->nodeLeafBucket.vectorsSize = this->trips.size();
+    this->nodeLeafBucket->vectorsSize = this->trips.size();
 
-    write(fdata, this->nodeLeafBucket);
+    write(fdata, *this->nodeLeafBucket);
 
     Trip dump;
-    for (int i = 0; i < this->nodeLeafBucket.M; i++) {
+    for (int i = 0; i < this->nodeLeafBucket->M; i++) {
       if (i < this->trips.size())
         write(fdata, this->trips[i]);
       else
         write(fdata, dump);
     }
 
+    findex.flush();
+    fdata.flush();
     findex.close();
     fdata.close();
   }

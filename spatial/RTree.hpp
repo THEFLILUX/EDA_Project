@@ -108,7 +108,7 @@ class RTree {
     this->download();
   }
 
-  void insertTrip(Trip& trip) {
+  void insertTrip(Trip trip) {
     if (this->rootBucket.isRootANodeLeaf) {
       this->nodePtr->getTrips().push_back(trip);
       if (this->nodePtr->getSize() == this->rootBucket.Mleaf + 1) {
@@ -233,6 +233,8 @@ class RTree {
   }
 
   void close() {
+    findex.flush();
+    fdata.flush();
     findex.close();
     fdata.close();
   }

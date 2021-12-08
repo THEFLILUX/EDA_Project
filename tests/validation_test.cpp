@@ -38,6 +38,7 @@ TEST(FirstTest, BasicTest) {
   RTree* rtree = new RTree(path);
   rtree->printTree();
   //-73.960029602050781,40.814136505126953
+
   std::vector<Trip> trips =
       rtree->rangeSearch(Point(-73.91, 40.80), Point(-73.90, 40.81));
   std::cout << "Query: " << trips.size() << "\n";
@@ -57,6 +58,7 @@ TEST(FirstTest, BasicTest) {
   }
   f.close();
   std::cout << "Fin test\n";
+
   /*
     Trip trip(1, 1, "path1", 11, 12);
     rtree.insertTrip(trip);

@@ -20,8 +20,40 @@ class BigRTree {
   BigRTree(std::string path, RTree*& rtree) : rtree(rtree), path(path) {}
   ~BigRTree() {}
   void loadFile(std::string path, std::string strLon, std::string strLat) {
+    /*std::ifstream file(path);
+    std::string line;
+    long first = 0;
+    long last = 0;
+
+    std::getline(file, line);
+    last += line.size();
+    last += 1;
+    int fila = 1;
+    int rejected = 0;
+    while (std::getline(file, line)) {
+      first = last;
+      last += line.size() + 1;
+      for (int i = 0; i < 5; i++) {
+        line.replace(0, line.find(",") + 1, "");
+      };
+      std::string lon = line.substr(0, line.find(","));
+      line.replace(0, line.find(",") + 1, "");
+      std::string lat = line.substr(0, line.find(","));
+      std::cout << fila++ << "\n";
+      if (lon == "0" || lon == "" || lat == "0" || lat == "")
+        rejected += 1;
+      else {
+        Trip* trip =
+            new Trip(std::stod(lon), std::stod(lat), path, first, last);
+        this->rtree->insertTrip(trip);
+      }
+    }
+    std::cout << "Rejected: " << rejected << "\n";
+    rtree->writeToFile();*/
+
     CSVFormat format;
     format.delimiter(',').no_header();
+    // CSVReader reader("../tests/RTree/testfew.csv", format);
     CSVReader reader(path, format);
     uint colLon = 0;
     uint colLat = 0;
@@ -44,7 +76,7 @@ class BigRTree {
     int fila = 1;
     int rejected = 0;
     std::string lon, lat;
-    Trip* trip = new Trip(path);
+    Trip trip(path);
     for (CSVRow& row : reader) {
       first = last;
       uint i = 0;
@@ -59,11 +91,11 @@ class BigRTree {
       if (lon == "0" || lon == "" || lat == "0" || lat == "")
         rejected += 1;
       else {
-        trip->setParamNotPath(std::stod(lon), std::stod(lat), first, last);
-        this->rtree->insertTrip(*trip);
+        trip.setParamNotPath(std::stod(lon), std::stod(lat), first, last);
+        this->rtree->insertTrip(trip);
       }
       std::cout << fila++ << "\t" << std::stod(lon) << "\t" << std::stod(lat)
-                << "\n";
+                << "\t" << first << "\t" << last << "\n";
     }
     std::cout << "Rejected: " << rejected << "\n";
     rtree->writeToFile();
