@@ -7,15 +7,13 @@ namespace spatial {
 
 class NodeIntern : public NodeBase {
  public:
-  NodeIntern(std::string index, std::string data, uint nodeID, uint M = 0,
+  NodeIntern(std::string index, std::string data, uint nodeID, uint M,
              bool isNew = false)
-      : index(index), data(data), nodeID(nodeID) {
+      : index(index), data(data), nodeID(nodeID), M(M) {
     this->nodeInternBucket = new NodeBucket();
     if (isNew) {
       // New nodeIntern
       // std::cout << "New nodeIntern\n";
-      this->nodeInternBucket->M = M;
-      this->nodeInternBucket->m = M / 2;
       this->nodeInternBucket->vectorsSize = 0;
       this->download(isNew);
     } else {
@@ -59,6 +57,7 @@ class NodeIntern : public NodeBase {
 
  private:
   uint nodeID;
+  uint M;
   NodeBucket* nodeInternBucket;
   std::vector<MBR> MBRs;
   std::vector<uint> children;
@@ -120,7 +119,7 @@ class NodeIntern : public NodeBase {
 
     MBR mbrDump;
     uint childDump;
-    for (int i = 0; i < this->nodeInternBucket->M; i++) {
+    for (int i = 0; i < this->M; i++) {
       if (i < this->MBRs.size()) {
         write(fdata, this->MBRs[i]);
         write(fdata, this->children[i]);

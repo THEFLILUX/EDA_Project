@@ -7,15 +7,13 @@ namespace spatial {
 
 class NodeLeaf : public NodeBase {
  public:
-  NodeLeaf(std::string index, std::string data, uint nodeID, uint M = 0,
+  NodeLeaf(std::string index, std::string data, uint nodeID, uint M,
            bool isNew = false)
-      : index(index), data(data), nodeID(nodeID) {
+      : index(index), data(data), nodeID(nodeID), M(M) {
     this->nodeLeafBucket = new NodeBucket();
     if (isNew) {
       // New nodeLeaf
       // std::cout << "New nodeLeaf\n";
-      this->nodeLeafBucket->M = M;
-      this->nodeLeafBucket->m = M / 2;
       this->nodeLeafBucket->vectorsSize = 0;
       this->download(isNew);
     } else {
@@ -61,6 +59,7 @@ class NodeLeaf : public NodeBase {
 
  private:
   uint nodeID;
+  uint M;
   NodeBucket* nodeLeafBucket;
   std::vector<Trip> trips;
   std::string index;
@@ -114,7 +113,7 @@ class NodeLeaf : public NodeBase {
     write(fdata, *this->nodeLeafBucket);
 
     Trip dump;
-    for (int i = 0; i < this->nodeLeafBucket->M; i++) {
+    for (int i = 0; i < this->M; i++) {
       if (i < this->trips.size())
         write(fdata, this->trips[i]);
       else

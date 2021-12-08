@@ -62,6 +62,10 @@ class RTree {
       std::cout
           << "Not exists, creating index and data files in root constructor\n";
       // New Rtree
+      if (Mleaf == 0 || Mintern == 0) {
+        std::cout << "\nNo M defined\n";
+        exit(1);
+      }
       this->rootBucket.Mleaf = Mleaf;
       this->rootBucket.mleaf = Mleaf / 2;
       this->rootBucket.Mintern = Mintern;

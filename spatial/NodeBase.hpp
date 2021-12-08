@@ -61,15 +61,11 @@ class IndexBucket {
 
 class NodeBucket {
  public:
-  uint M;
-  uint m;
   uint vectorsSize;
 
   NodeBucket() {}
   void print() {
     std::cout << "\tPrint bucket:\n";
-    std::cout << "\tM: " << this->M << "\n";
-    std::cout << "\tm: " << this->m << "\n";
     std::cout << "\tvectorsSize: " << this->vectorsSize << "\n";
   }
 };
