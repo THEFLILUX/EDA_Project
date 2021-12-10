@@ -42,8 +42,9 @@ class RootBucket {
  */
 class RTree {
  public:
-  RTree(std::string path, uint Mleaf = 0, uint Mintern = 0)
-      : rootPath(path), nodePtr(nullptr) {
+  RTree(std::string path, bool canEdit = false, uint Mleaf = 0,
+        uint Mintern = 0)
+      : rootPath(path), nodePtr(nullptr), canEdit(canEdit) {
     std::cout << "Index Path: " << this->rootPath + this->indexName << "\n";
     std::cout << "Data Path: " << this->rootPath + this->dataName << "\n";
 
@@ -59,31 +60,36 @@ class RTree {
     fdata.open(this->rootPath + this->dataName,
                std::ios::binary | std::ios::in | std::ios::out);
     if (is_empty(findex)) {
-      std::cout
-          << "Not exists, creating index and data files in root constructor\n";
-      // New Rtree
-      if (Mleaf == 0 || Mintern == 0) {
-        std::cout << "\nNo M defined\n";
+      if (this->canEdit) {
+        std::cout << "Not exists, creating index and data files in root "
+                     "constructor\n";
+        // New Rtree
+        if (Mleaf == 0 || Mintern == 0) {
+          std::cout << "\nNo M defined\n";
+          exit(1);
+        }
+        this->rootBucket.Mleaf = Mleaf;
+        this->rootBucket.mleaf = Mleaf / 2;
+        this->rootBucket.Mintern = Mintern;
+        this->rootBucket.mintern = Mintern / 2;
+        this->rootBucket.rootNumber = 1;
+        this->rootBucket.isRootANodeLeaf = true;
+        this->rootBucket.nextNodeNumber = 2;
+        this->rootBucket.numberTrips = 0;
+
+        this->download();
+
+        this->close();
+        nodePtr = new NodeLeaf(this->rootPath + this->indexName,
+                               this->rootPath + this->dataName, 1, Mleaf, true);
+        this->open();
+
+        delete nodePtr;
+        nodePtr = nullptr;
+      } else {
+        std::cout << "Archivo vacío\n";
         exit(1);
       }
-      this->rootBucket.Mleaf = Mleaf;
-      this->rootBucket.mleaf = Mleaf / 2;
-      this->rootBucket.Mintern = Mintern;
-      this->rootBucket.mintern = Mintern / 2;
-      this->rootBucket.rootNumber = 1;
-      this->rootBucket.isRootANodeLeaf = true;
-      this->rootBucket.nextNodeNumber = 2;
-      this->rootBucket.numberTrips = 0;
-
-      this->download();
-
-      this->close();
-      nodePtr = new NodeLeaf(this->rootPath + this->indexName,
-                             this->rootPath + this->dataName, 1, Mleaf, true);
-      this->open();
-
-      delete nodePtr;
-      nodePtr = nullptr;
     } else {
       // Load existing RTree
       // std::cout << "Load RTree\n";
@@ -228,6 +234,7 @@ class RTree {
   std::fstream findex;
   RootBucket rootBucket;
   IndexBucket indexBucket;
+  bool canEdit;
 
   void open() {
     findex.open(this->rootPath + this->indexName,
@@ -258,8 +265,9 @@ class RTree {
 
     findex.seekg((nodeNumber - 1) * sizeof(IndexBucket), std::ios::beg);
     read(findex, this->indexBucket);
+
     this->close();
-    this->nodePtr->writeToFile();
+    if (this->canEdit) this->nodePtr->writeToFile();
     delete this->nodePtr;
     this->nodePtr = nullptr;
     if (this->indexBucket.isNodeLeaf) {

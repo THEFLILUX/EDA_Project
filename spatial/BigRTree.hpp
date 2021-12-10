@@ -62,8 +62,8 @@ class BigRTree {
         trip.setParamNotPath(std::stod(lon), std::stod(lat), first, last);
         this->rtree->insertTrip(trip);
       }
-      std::cout << fila++ << "\t" << std::stod(lon) << "\t" << std::stod(lat)
-                << "\n";
+      std::cout << name << "\t" << fila++ << "\t" << std::stod(lon) << "\t"
+                << std::stod(lat) << "\n";
     }
     std::cout << "Rejected: " << rejected << "\n";
     rtree->writeToFile();
