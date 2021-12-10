@@ -110,6 +110,7 @@ class RTree {
     this->loadNodeInNodePtr(this->rootBucket.rootNumber, false);
   }
   ~RTree() {
+    delete this->nodePtr;
     findex.close();
     fdata.close();
   }

@@ -75,10 +75,22 @@ TEST(FirstTest, BasicTest) {
   Tester* tester = new Tester(path, rtree);
   rtree->printTree();
 
-  tester->test(Point(-73.91, 40.80), Point(-73.90, 40.81));
+  // tester->test(Point(-73.9069, 40.8070), Point(-73.9067, 40.8074), true); //7
+  // tester->test(Point(-73.9939, 40.7501), Point(-73.9938, 40.7502));  // 864
+  // tester->test(Point(-73.99389649, 40.750110625),
+  //             Point(-73.99389647, 40.750110627), true);  // 9 iguales
+  // tester->test(Point(-74.0016480, 40.724243),
+  // Point(-74.0016478, 40.724244),true);
+
+  // tester->test(Point(-73.960351, 40.766399),
+  // Point(-73.960350, 40.766400),true);
+  tester->test(Point(-73.9537812, 40.7907066), Point(-73.9537811, 40.7907067),
+               true);
 
   std::cout << "Fin test\n";
 
+  delete rtree;
+  delete tester;
   EXPECT_TRUE(1);
 }
 
