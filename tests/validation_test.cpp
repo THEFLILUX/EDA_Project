@@ -110,8 +110,8 @@ TEST(FirstTest, BasicTest) {
   tester->test(Point(-74.0016480, 40.724243), Point(-74.0016478, 40.724244),
                true);  // Test 4
 
-  // std::cout << "\n\tTEST 5: ";
-  // tester->test(Point(-74, 40), Point(-73, 41));  // Test 5
+  std::cout << "\n\tTEST 5: ";
+  tester->test(Point(-73.5, 40), Point(-73, 41));  // Test 5
 
   std::cout << "Fin test\n";
 
