@@ -427,6 +427,13 @@ void RTree::splitNodeLeaf(NodeBase*& firstNode, NodeBase*& secondNode,
       }
     }
   }
+  if (trip1.getLon() == 0.0) {
+    // Puntos iguales, escojo los dos primeros.
+    trip1 = trips[0];
+    trip2 = trips[1];
+    ind1 = 0;
+    ind2 = 1;
+  }
   if (trip1.getLon() < trip2.getLon()) {
     firstNode->getTrips().push_back(trip1);
     secondNode->getTrips().push_back(trip2);
@@ -527,6 +534,12 @@ void RTree::splitNodeIntern(NodeBase*& firstNode, NodeBase*& secondNode,
         maxMBRDistance = localDistance;
       }
     }
+  }
+  if (mbrTmp1.isNull() || mbrTmp2.isNull()) {
+    mbrTmp1 = MBRs[0];
+    mbrTmp2 = MBRs[1];
+    ind1 = 0;
+    ind2 = 1;
   }
   if (mbrTmp1.getIniLon() < mbrTmp2.getIniLon() ||
       (mbrTmp1.getIniLon() == mbrTmp2.getIniLon() &&

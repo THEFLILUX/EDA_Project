@@ -48,15 +48,6 @@ class NodeLeaf : public NodeBase {
     }
   }
 
-  std::vector<MBR>& getMBRs() override {
-    std::vector<MBR> mbrs;
-    return mbrs;
-  }
-  std::vector<uint>& getChildren() override {
-    std::vector<uint> children;
-    return children;
-  }
-
  private:
   uint nodeID;
   uint M;

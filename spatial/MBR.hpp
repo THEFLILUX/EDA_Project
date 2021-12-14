@@ -285,14 +285,14 @@ class MBR {
 
     return sqrt(dif1 * dif1 + dif2 * dif2);
   }
-
- private:
-  Point ini;
-  Point fin;
   bool isNull() {
     return ini.getLon() == MBRNULL && ini.getLat() == MBRNULL &&
            fin.getLon() == MBRNULL && fin.getLat() == MBRNULL;
   }
+
+ private:
+  Point ini;
+  Point fin;
 };
 
 }  // namespace spatial

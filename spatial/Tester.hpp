@@ -42,12 +42,14 @@ class Tester {
         f.open(localPath, std::ios::in);
         if (f.is_open()) {
           for (Trip& trip : pair.second) {
-            std::cout << std::setprecision(17) << trip.getLon() << ","
+            /*std::cout << std::setprecision(17) << trip.getLon() << ","
                       << std::setprecision(17) << trip.getLat() << "\t"
                       << trip.getTripInit() << "," << trip.getTripOffset()
-                      << "\n";
-            f.seekg(trip.getTripInit(), std::ios::beg);
-            uint tam = trip.getTripOffset() - trip.getTripInit() - 1;
+                      << "\n";*/
+            uint ini = trip.getTripInit();
+            uint fin = trip.getTripOffset();
+            f.seekg(ini, std::ios::beg);
+            uint tam = fin - ini - 1;
             char* buffer = new char[tam + 1];
             f.read(buffer, tam);
             buffer[tam] = '\0';
@@ -55,6 +57,20 @@ class Tester {
             delete[] buffer;
 
             // Doing something with row:
+            if (row.find("\n") != std::string::npos) {
+              uint red =
+                  row.substr(row.find("\n"), row.length() - row.find("\n"))
+                      .length();
+              ini -= red;
+              fin -= red;
+              f.seekg(ini, std::ios::beg);
+              uint tam = fin - ini - 1;
+              char* buffer = new char[tam + 1];
+              f.read(buffer, tam);
+              buffer[tam] = '\0';
+              row = buffer;
+              delete[] buffer;
+            }
             std::cout << row << "\n";
           }
           f.close();

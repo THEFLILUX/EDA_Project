@@ -20,9 +20,9 @@ class NodeBase {
   virtual uint getSize() = 0;
   virtual uint getNodeID() = 0;
 
-  virtual std::vector<Trip>& getTrips() = 0;
-  virtual std::vector<MBR>& getMBRs() = 0;
-  virtual std::vector<uint>& getChildren() = 0;
+  virtual std::vector<Trip>& getTrips() {}
+  virtual std::vector<MBR>& getMBRs() {}
+  virtual std::vector<uint>& getChildren() {}
 
   virtual ~NodeBase() {}
 

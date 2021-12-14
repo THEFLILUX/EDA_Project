@@ -50,11 +50,6 @@ class NodeIntern : public NodeBase {
     }
   }
 
-  std::vector<Trip>& getTrips() override {
-    std::vector<Trip> trips;
-    return trips;
-  }
-
  private:
   uint nodeID;
   uint M;

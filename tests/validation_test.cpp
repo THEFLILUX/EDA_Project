@@ -11,8 +11,28 @@ using namespace utec::spatial;
 TEST(FirstTest, BasicTest) {
   // Load data to rtree
   std::string path = "../tests/RTree/RawData/";
+  // std::string path = "../tests/RTree/";
   std::string pathData = path + "data.rtree";
   std::string pathIndx = path + "index.rtree";
+
+  // INSERT test
+  /*
+    int status = remove(pathData.c_str());
+    status = remove(pathIndx.c_str());
+    uint Mleaf = 50;
+    uint Mintern = 110;
+
+    RTree* rtree = new RTree(path, true, Mleaf, Mintern);
+
+    BigRTree* bigRTree = new BigRTree(path, rtree);
+    std::vector<std::string> names;
+    names.push_back("test.csv");
+    bigRTree->loadFiles(names, "Pickup_longitude", "Pickup_latitude");
+    names.clear();
+    rtree->printTree();
+    delete rtree;
+    delete bigRTree;
+  */
   /*
     int status = remove(pathData.c_str());
     status = remove(pathIndx.c_str());
@@ -75,17 +95,23 @@ TEST(FirstTest, BasicTest) {
   Tester* tester = new Tester(path, rtree);
   rtree->printTree();
 
-  // tester->test(Point(-73.9069, 40.8070), Point(-73.9067, 40.8074), true); //7
-  // tester->test(Point(-73.9939, 40.7501), Point(-73.9938, 40.7502));  // 864
-  // tester->test(Point(-73.99389649, 40.750110625),
-  //             Point(-73.99389647, 40.750110627), true);  // 9 iguales
-  // tester->test(Point(-74.0016480, 40.724243),
-  // Point(-74.0016478, 40.724244),true);
+  std::cout << "\n\tTEST 1: ";
+  tester->test(Point(-73.9069, 40.8070), Point(-73.9067, 40.8074),
+               true);  // Test 1
 
-  // tester->test(Point(-73.960351, 40.766399),
-  // Point(-73.960350, 40.766400),true);
-  tester->test(Point(-73.9537812, 40.7907066), Point(-73.9537811, 40.7907067),
-               true);
+  std::cout << "\n\tTEST 2: ";
+  tester->test(Point(-73.9939, 40.7501), Point(-73.9938, 40.7502));  // Test 2
+
+  std::cout << "\n\tTEST 3: ";
+  tester->test(Point(-73.99389649, 40.750110625),
+               Point(-73.99389647, 40.750110627), true);  // Test 3
+
+  std::cout << "\n\tTEST 4: ";
+  tester->test(Point(-74.0016480, 40.724243), Point(-74.0016478, 40.724244),
+               true);  // Test 4
+
+  // std::cout << "\n\tTEST 5: ";
+  // tester->test(Point(-74, 40), Point(-73, 41));  // Test 5
 
   std::cout << "Fin test\n";
 
